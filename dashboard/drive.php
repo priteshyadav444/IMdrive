@@ -182,6 +182,7 @@
                             <div class="add-product">
                                 <a href="add-project.php">Add Project</a>
                             </div>
+                            <hr>
                             <div class="asset-inner">
                                 <table class="table">
                                     <thead>
