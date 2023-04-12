@@ -73,8 +73,8 @@
                             <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
                             <span class="mini-click-non">Tasks</span></a>
                         <ul class="submenu-angle" aria-expanded="false">
-                            <li><a title="User List" href=""><span class="mini-sub-pro">View
-                                        List</span></a></li>
+                            <li><a title="User List" href="task.php"><span class="mini-sub-pro">View
+                                        Task</span></a></li>
                             <li><a title="Add User" href=""><span class="mini-sub-pro">Add
                                         Task</span></a></li>
                         </ul>
@@ -85,7 +85,7 @@
                             <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
                             <span class="mini-click-non">Tickets</span></a>
                         <ul class="submenu-angle" aria-expanded="false">
-                            <li><a title="User List" href=""><span class="mini-sub-pro">View
+                            <li><a href="ticket.php" title="User List" href=""><span class="mini-sub-pro">View
                                         Tickets</span></a></li>
                             <li><a title="Add User" href=""><span class="mini-sub-pro">Add
                                         Ticket</span></a></li>
