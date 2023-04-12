@@ -111,6 +111,18 @@
             left: 20px;
         }
     </style>
+    <script>
+        document.getElementById("addFileBtn").addEventListener("click", function() {
+            var selectedFiles = [];
+            var selectBox = document.getElementById("assignFiles");
+            for (var i = 0; i < selectBox.options.length; i++) {
+                if (selectBox.options[i].selected) {
+                    selectedFiles.push(selectBox.options[i].text);
+                }
+            }
+            // Perform add action with the selected files
+        });
+    </script>
 </head>
 
 <body>
@@ -251,19 +263,39 @@
                                                 <div class="col-md-12">
                                                     <h5>Assigned Members:</h5>
                                                     <ul class="list-group">
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            John Smith
-                                                            <button class="btn btn-primary" data-toggle="modal" data-target="#assignedFilesModal">View Files</button>
+                                                        <li class="list-group-item">
+                                                            <div class="row">
+                                                                <div class="col-xs-8">
+                                                                    John Smith
+                                                                </div>
+                                                                <div class="col-xs-4 text-right">
+                                                                    <button class="btn btn-primary" data-toggle="modal" data-target="#assignedFilesModal">View Files</button>
+                                                                </div>
+                                                            </div>
                                                         </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            Jane Doe
-                                                            <button class="btn btn-primary" data-toggle="modal" data-target="#assignedFilesModal">View Files</button>
+                                                        <li class="list-group-item">
+                                                            <div class="row">
+                                                                <div class="col-xs-8">
+                                                                    Jane Doe
+                                                                </div>
+                                                                <div class="col-xs-4 text-right">
+                                                                    <button class="btn btn-primary" data-toggle="modal" data-target="#assignedFilesModal">View Files</button>
+                                                                </div>
+                                                            </div>
                                                         </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            Bob Johnson
-                                                            <button class="btn btn-primary" data-toggle="modal" data-target="#assignedFilesModal">View Files</button>
+                                                        <li class="list-group-item">
+                                                            <div class="row">
+                                                                <div class="col-xs-8">
+                                                                    Bob Johnson
+                                                                </div>
+                                                                <div class="col-xs-4 text-right">
+                                                                    <button class="btn btn-primary" data-toggle="modal" data-target="#assignedFilesModal">View Files</button>
+                                                                </div>
+                                                            </div>
                                                         </li>
                                                     </ul>
+
+
                                                 </div>
                                             </div>
                                         </div>
@@ -323,7 +355,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <label>Select:</label>
+                                                <label>Select Team:</label>
                                                 <select id="assignList" class="form-control" multiple>
                                                     <option>Team A</option>
                                                     <option>Team B</option>
@@ -332,23 +364,55 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" name="assignAllFiles" id="assignAllFiles" checked>
-                                                    <label class="form-check-label" for="assignAllFiles">Assign All Files</label>
-                                                </div>
+                                                <label>Select Team Member:</label>
+                                                <select id="assignList" class="form-control" multiple>
+                                                    <option>Member A</option>
+                                                    <option>Member B</option>
+                                                    <option>Member C</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="assignAllFiles" id="assignAllFiles" checked>
+                                                <label class="form-check-label" for="assignAllFiles">Assign All Files</label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Select Deliverable:</label>
+                                                <select id="assignDeliverables" class="form-control">
+                                                    <option>Deliverable A</option>
+                                                    <option>Deliverable B</option>
+                                                    <option>Deliverable C</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Search Files:</label>
+                                                <input type="text" class="form-control" id="assignSearchFiles" placeholder="Enter search term...">
                                             </div>
 
                                             <label>Select Files:</label>
                                             <select id="assignFiles" class="form-control" multiple>
-                                                <option>Files A</option>
-                                                <option>Files B</option>
-                                                <option>Files C</option>
+                                                <option>File A</option>
+                                                <option>File B</option>
+                                                <option>File C</option>
                                             </select>
 
-
+                                            <div class="form-group">
+                                                <button type="button" class="btn btn-primary" id="addFileBtn">Add File</button>
+                                            </div>
 
                                             <!-- Add Task Button -->
-
+                                            <div class="form-group">
+                                                <label for="taskType">Task Type*</label>
+                                                <select id="assignList" class="form-control" id="taskType" placeholder="Enter Task Type">
+                                                    <option>Task A</option>
+                                                    <option>Task B</option>
+                                                    <option>Task C</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="taskDescription">Task Description*</label>
+                                                <textarea class="form-control" id="taskDescription" rows="3" placeholder="Enter Task Description"></textarea>
+                                            </div>
                                             <button class="btn btn-primary" data-toggle="modal" data-target="#assignModalTask">
                                                 <i class="glyphicon glyphicon-plus"></i> Add Task
                                             </button>
@@ -361,40 +425,6 @@
                                         </div>
                                     </div>
 
-                                </div>
-                            </div>
-
-                            <!-- Add Task Modal -->
-                            <div class="modal fade" id="assignModalTask" tabindex="-1" role="dialog" aria-labelledby="assignModalTaskLabel" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="assignModalTaskLabel">Add Task</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form>
-                                                <div class="form-group">
-                                                    <label for="taskType">Task Type*</label>
-                                                    <select id="assignList" class="form-control" id="taskType" placeholder="Enter Task Type">
-                                                        <option>Task A</option>
-                                                        <option>Task B</option>
-                                                        <option>Task C</option>
-                                                    </select>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="taskDescription">Task Description*</label>
-                                                    <textarea class="form-control" id="taskDescription" rows="3" placeholder="Enter Task Description"></textarea>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">Add Task</button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
