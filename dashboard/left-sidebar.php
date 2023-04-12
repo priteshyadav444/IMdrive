@@ -8,6 +8,16 @@
             <nav class="sidebar-nav left-sidebar-menu-pro">
                 <ul class="metismenu" id="menu1">
                     <li>
+                        <a class="has-arrow" href="index.php" aria-expanded="false">
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                            <span class="mini-click-non">Dashboard</span></a>
+                        <ul class="submenu-angle" aria-expanded="false">
+                            <li><a title="Dashboard View" href="index.php"><span class="mini-sub-pro">View
+                                        Dashboard </span></a></li>
+
+                        </ul>
+                    </li>
+                    <li>
                         <a class="has-arrow" href="master.php" aria-expanded="false">
                             <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
                             <span class="mini-click-non">Master</span></a>
@@ -21,6 +31,29 @@
                         </ul>
                     </li>
 
+                    <li>
+                        <a class="has-arrow" href="all-courses.php" aria-expanded="false">
+                            <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+                            <span class="mini-click-non"> Drive</span>
+                        </a>
+
+                        <ul class="submenu-angle" aria-expanded="false">
+                            <li>
+                                <a title="User List" href="drive.php">
+                                    <span class="mini-sub-pro">
+                                        View Project
+                                    </span>
+                                </a>
+                            </li>
+                            <li>
+                                <a title="User List" href="add-project.php">
+                                    <span class="mini-sub-pro">
+                                        Add Project
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
                     <li>
                         <a class="has-arrow" href="all-courses.php" aria-expanded="false">
@@ -32,6 +65,41 @@
                                         List</span></a></li>
                             <li><a title="Add User" href="add-user.php"><span class="mini-sub-pro">Add
                                         User</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a class="has-arrow" href="all-courses.php" aria-expanded="false">
+                            <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
+                            <span class="mini-click-non">Tasks</span></a>
+                        <ul class="submenu-angle" aria-expanded="false">
+                            <li><a title="User List" href=""><span class="mini-sub-pro">View
+                                        List</span></a></li>
+                            <li><a title="Add User" href=""><span class="mini-sub-pro">Add
+                                        Task</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a class="has-arrow" href="all-courses.php" aria-expanded="false">
+                            <span class="glyphicon glyphicon-comment" aria-hidden="true"></span>
+                            <span class="mini-click-non">Tickets</span></a>
+                        <ul class="submenu-angle" aria-expanded="false">
+                            <li><a title="User List" href=""><span class="mini-sub-pro">View
+                                        Tickets</span></a></li>
+                            <li><a title="Add User" href=""><span class="mini-sub-pro">Add
+                                        Ticket</span></a></li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a class="has-arrow" href="all-courses.php" aria-expanded="false">
+                            <span class="glyphicon glyphicon-cog    " aria-hidden="true"></span>
+                            <span class="mini-click-non">Settings</span></a>
+                        <ul class="submenu-angle" aria-expanded="false">
+
+                            <li><a title="Add User" href=""><span class="mini-sub-pro">Add
+                                        Email</span></a></li>
                         </ul>
                     </li>
 
