@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>Add Department | Kiaalap - Kiaalap Admin Template</title>
+  <title>User - Image Drive</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- favicon
@@ -53,9 +53,6 @@
 		============================================ -->
   <link rel="stylesheet" href="css/calendar/fullcalendar.min.css">
   <link rel="stylesheet" href="css/calendar/fullcalendar.print.min.css">
-  <!-- forms CSS
-		============================================ -->
-  <link rel="stylesheet" href="css/form/all-type-forms.css">
   <!-- style CSS
 		============================================ -->
   <link rel="stylesheet" href="style.css">
@@ -65,6 +62,55 @@
   <!-- modernizr JS
 		============================================ -->
   <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+  <style>
+    .material-switch>input[type="checkbox"] {
+      display: none;
+    }
+
+    .material-switch>label {
+      cursor: pointer;
+      height: 0px;
+      position: relative;
+      width: 40px;
+    }
+
+    .material-switch>label::before {
+      background: rgb(0, 0, 0);
+      box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      content: '';
+      height: 16px;
+      margin-top: -8px;
+      position: absolute;
+      opacity: 0.3;
+      transition: all 0.4s ease-in-out;
+      width: 40px;
+    }
+
+    .material-switch>label::after {
+      background: rgb(255, 255, 255);
+      border-radius: 16px;
+      box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+      content: '';
+      height: 24px;
+      left: -4px;
+      margin-top: -8px;
+      position: absolute;
+      top: -4px;
+      transition: all 0.3s ease-in-out;
+      width: 24px;
+    }
+
+    .material-switch>input[type="checkbox"]:checked+label::before {
+      background: inherit;
+      opacity: 0.5;
+    }
+
+    .material-switch>input[type="checkbox"]:checked+label::after {
+      background: inherit;
+      left: 20px;
+    }
+  </style>
 </head>
 
 <body>
@@ -72,7 +118,7 @@
 		<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
   <!-- Start Left menu area -->
-  <?php include 'left-sidebar.php'; ?>
+  <?php include_once 'left-sidebar.php'; ?>
   <!-- End Left menu area -->
   <!-- Start Welcome area -->
   <div class="all-content-wrapper">
@@ -86,78 +132,69 @@
       </div>
     </div>
     <?php include 'headertop.php' ?>
-  
-    <!-- Single pro tab review Start-->
-    <div class="single-pro-review-area mt-t-30 mg-b-15 mg-t-15">
+    <div class="product-status mg-b-15 mg-t-15">
       <div class="container-fluid">
         <div class="row">
           <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div class="product-payment-inner-st">
-              <ul id="myTabedu1" class="tab-review-design">
-                <li class="active"><a href="#description">Add Project</a></li>
+            <div class="product-status-wrap drp-lst">
+              <h4>Role And Persmission List</h4>
+              
+              <div class="asset-inner">
+                <table>
+                  <tr>
+                    <th>Id</th>
+                    <th>User type</th>
+                    <th>Created On</th>
+                    <th>View Roles and Permissions</th>
+                    <th>Edit Roles and Permission</th>
+                    <th>Add new Role and Permission</th>
+                  </tr>
+                  <tr>
+                    <td>1</td>
+                    <td>Admin </td>
+                    <td>12/03/2022</td>
+                    <td>
+                      <button class="btn btn-link" data-toggle="modal" data-target="#assigneesModal">
+                        View All
+                      </button>
+                    </td>
+                    <td>
+                      <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                    </td>
+                    <td><button class="btn btn-primary" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i></button></td>
 
-              </ul>
-              <div id="myTabContent" class="tab-content custom-product-edit">
-                <div class="product-tab-list tab-pane fade active in" id="description">
-                  <div class="row">
-                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                      <div class="review-content-section">
-                        <form id="add-department" action="#" class="add-department">
-                          <div class="row">
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                              <div class="form-group">
-                                <input name="name" type="text" class="form-control" placeholder="Enter Project Name">
-                              </div>
-                              <div class="form-group">
-                                <input name="logo" type="file" class="form-control" placeholder="Select Project Logo ">
-                              </div>
-                          
-                            </div>
-                            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                              <div class="form-group">
-                                <div class="form-select-list">
-                                  <select class="form-control custom-select-value" name="deliverable">
-                                    <option>Select Deliverable Type</option>
-                                    <option>Select 2</option>
-                                    <option>Select 3</option>
-                                  </select>
-                                </div>
-                              </div>
-                        
-                              <div class="form-group">
-                                <input name="description" type="text" class="form-control" placeholder="Enter Project Description">
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row">
-                            <div class="col-lg-12">
-                              <div class="payment-adress">
-                                <button type="submit" class="btn btn-primary waves-effect waves-light">Submit</button>
-                              </div>
-                            </div>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  </tr>
               </div>
+              </td>
+              </table>
+            </div>
+            <div class="custom-pagination">
+              <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                  <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                  <li class="page-item"><a class="page-link" href="#">1</a></li>
+                  <li class="page-item"><a class="page-link" href="#">2</a></li>
+                  <li class="page-item"><a class="page-link" href="#">3</a></li>
+                  <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                </ul>
+              </nav>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="footer-copyright-area">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-            <div class="footer-copy-right">
-              <p>Copyright © 2018. All rights reserved. Template by <a href="https://colorlib.com/wp/templates/">Colorlib</a></p>
-            </div>
+  </div>
+  <div class="footer-copyright-area">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="footer-copy-right">
+            <p>Copyright © 2018. All rights reserved. Template by <a href="https://colorlib.com/wp/templates/">Colorlib</a></p>
           </div>
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <!-- jquery
@@ -201,14 +238,6 @@
   <script src="js/calendar/moment.min.js"></script>
   <script src="js/calendar/fullcalendar.min.js"></script>
   <script src="js/calendar/fullcalendar-active.js"></script>
-  <!-- form validate JS
-		============================================ -->
-  <script src="js/form-validation/jquery.form.min.js"></script>
-  <script src="js/form-validation/jquery.validate.min.js"></script>
-  <script src="js/form-validation/form-active.js"></script>
-  <!-- tab JS
-		============================================ -->
-  <script src="js/tab.js"></script>
   <!-- plugins JS
 		============================================ -->
   <script src="js/plugins.js"></script>

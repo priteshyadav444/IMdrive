@@ -172,12 +172,23 @@
                 <div class="panel-heading">Deliverables</div>
                 <div class="panel-body">
                   <div class="list-group">
-                    <a href="deliverable.php" class="list-group-item">
-                      <span class="glyphicon glyphicon-folder-close"></span> Deliverable 1
-                      <span class="pull-right">
-                        <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i> Assign</button>
-                      </span>
+                    <a href="deliverable.php">
+                      <span class="glyphicon glyphicon-folder-close" class="list-group-item"></span> Deliverable 1
                     </a>
+                    <span class="pull-right" class="list-group-item">
+                      <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i> Assign</button>
+                    </span>
+
+
+                  </div>
+
+                  <div class="list-group">
+                    <a href="deliverable.php">
+                      <span class="glyphicon glyphicon-folder-close" class="list-group-item"></span> Deliverable 1
+                    </a>
+                    <span class="pull-right" class="list-group-item">
+                      <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i> Assign</button>
+                    </span>
                   </div>
                 </div>
               </div>

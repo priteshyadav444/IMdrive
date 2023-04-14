@@ -1,3 +1,7 @@
+<?php
+@session_start();
+date_default_timezone_set("Asia/Calcutta");
+?>
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -177,6 +181,7 @@
                     <th>Name of User</th>
                     <th>Email</th>
                     <th>Type</th>
+                    <th>Team</th>
                     <th>Status</th>
                     <th>Change Status</th>
                   </tr>
@@ -186,6 +191,7 @@
                     <td>John Alva</td>
                     <td>admin@gmail.com</td>
                     <td>users</td>
+                    <td>Admin Panel Web, BackEnd </td>
                     <td>
                       <button class="pd-setting">Active</button>
                     </td>

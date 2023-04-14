@@ -174,7 +174,7 @@
     <div class="product-status mg-b-15">
       <div class="container-fluid">
         <div class="row">
-          <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
             <div class="product-status-wrap drp-lst">
               <h4>Deliverable List</h4>
               <div class="add-product">
@@ -211,7 +211,7 @@
             </div>
           </div>
 
-          <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+          <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
             <div class="product-status-wrap drp-lst">
               <h4>Team List</h4>
               <div class="add-product">
@@ -248,48 +248,7 @@
             </div>
           </div>
 
-          <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-            <div class="product-status-wrap drp-lst">
-              <h4>User Type</h4>
-              <div class="add-product">
-                <a href="add-masterlist.php">Add User Type</a>
-              </div>
-              <div class="asset-inner">
-                <table>
-                  <tr>
-                    <th>User Type </th>
-                    <th>Edit</th>
 
-                  </tr>
-                  <tr>
-                    <td>Viewer</td>
-                    <td>
-                      <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Uploaded</td>
-                    <td>
-                      <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                    </td>
-
-                  </tr>
-                </table>
-              </div>
-
-            </div>
-            <div class="custom-pagination">
-              <nav aria-label="Page navigation example">
-                <ul class="pagination">
-                  <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                  <li class="page-item"><a class="page-link" href="#">1</a></li>
-                  <li class="page-item"><a class="page-link" href="#">2</a></li>
-                  <li class="page-item"><a class="page-link" href="#">3</a></li>
-                  <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                </ul>
-              </nav>
-            </div>
-          </div>
 
         </div>
 
@@ -399,7 +358,7 @@
       <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
           <div class="footer-copy-right">
-            <p>Copyright © 2018. All rights reserved. 
+            <p>Copyright © 2018. All rights reserved.
           </div>
         </div>
       </div>
