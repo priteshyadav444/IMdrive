@@ -2,6 +2,8 @@
 require_once "../Config/Privilege.php";
 require_once "../Config/SessionConfig.php";
 @session_start();
+        // var_dump($_SESSION[SessionConfig::PRIVILAGS]);
+
 // var_dump($_SESSION[SessionConfig::PRIVILAGS]);
 // if (!isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DRIVE])) {
 //     $URL = "login.php";
@@ -113,11 +115,11 @@ require_once "../Config/SessionConfig.php";
                         </li>';
                     }
 
-                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK]) {
+                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK_LOG]) {
                         echo '<li>
                         <a class="has-arrow" href="all-courses.php" aria-expanded="false">
                             <span class="glyphicon glyphicon-check" aria-hidden="true"></span>
-                            <span class="mini-click-non">Tasks</span>
+                            <span class="mini-click-non">Tasks Log</span>
                         </a>
                         <ul class="submenu-angle" aria-expanded="false">
                             <li>
@@ -125,13 +127,6 @@ require_once "../Config/SessionConfig.php";
                                     <span class="mini-sub-pro">
                                         View Task
                                  </span>
-                                </a>
-                            </li>
-                            <li>
-                                <a title="Add Task" href="">
-                                    <span class="mini-sub-pro">
-                                        Add Task
-                                    </span>
                                 </a>
                             </li>
                         </ul>
@@ -191,7 +186,6 @@ require_once "../Config/SessionConfig.php";
                     </li>';
                     }
 
-                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_PROFILE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_PROFILE]) {
                         echo ' <li>
                         <a class="has-arrow" href="all-courses.php" aria-expanded="false">
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
@@ -207,7 +201,7 @@ require_once "../Config/SessionConfig.php";
                             <li><a title="Add User" href="password-recovery.php"><span class="mini-sub-pro">Password Recovery</span></a></li>
                         </ul>
                     </li>';
-                    }
+                    
                     ?>
 
                 </ul>
