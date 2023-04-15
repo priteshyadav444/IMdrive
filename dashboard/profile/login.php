@@ -39,8 +39,7 @@
       if (!$isValid) {
         $obj->setError("Invalid Caredentails", "custom");
       } else {
-        echo "<pre>";
-        var_dump($_SESSION[SessionConfig::PRIVILAGS]);
+        // var_dump($_SESSION[SessionConfig::PRIVILAGS]);
       }
     }
   }
