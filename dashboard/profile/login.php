@@ -1,3 +1,8 @@
+<?php
+ob_start();
+
+?>
+
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -6,7 +11,7 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <title>Login | Image Drive</title>
   <meta name="description" content="">
-  <?php require_once '../shared/head-link.php'; ?>
+  <?php include_once '../shared/head-link.php'; ?>
 
 </head>
 
@@ -15,6 +20,7 @@
 		<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
   <?php
+
   require_once "../library/validation/vendor/autoload.php";
   require_once "../database/Connection.php";
   require_once "../database/User.php";
@@ -39,6 +45,8 @@
       if (!$isValid) {
         $obj->setError("Invalid Caredentails", "custom");
       } else {
+        $redirectPageUrl = "../master/index.php";
+        header('Location: ' . $redirectPageUrl);
         // var_dump($_SESSION[SessionConfig::PRIVILAGS]);
       }
     }
@@ -82,7 +90,7 @@
       </div>
 
     </div>
-  </div> 
+  </div>
   <?php include_once '../shared/footer-link.php'; ?>
 
 </body>
