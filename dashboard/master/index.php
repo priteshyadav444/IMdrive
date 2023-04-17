@@ -1,3 +1,5 @@
+<?php @session_start();
+require_once '../shared/check-login.php'; ?>
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -8,7 +10,11 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <?php require_once '../shared/head-link.php'; ?>
+    <?php
+    require_once '../shared/head-link.php';
+    ?>
+
+
 
 </head>
 
@@ -17,14 +23,17 @@
 		<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
     <!-- Start Left menu area -->
-    <?php include_once '../shared/left-sidebar.php'; ?>
+    <?php
+    include_once '../shared/left-sidebar.php';
 
+
+    ?>
     <!-- End Left menu area -->
     <!-- Start Welcome area -->
     <div class="all-content-wrapper">
         <?php include_once '../shared/logolink.php'; ?>
         <div class="header-advance-area">
-        <?php include_once '../shared/navbar.php'; ?>
+            <?php include_once '../shared/navbar.php'; ?>
 
             <!-- Mobile Menu start -->
 
@@ -62,11 +71,14 @@
         <div class="product-status mg-b-15">
             <div class="container-fluid">
                 <div class="row">
+                    <?php
+                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) {
+                        echo '
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                         <div class="product-status-wrap drp-lst">
                             <h4>Deliverable List</h4>
                             <div class="add-product">
-                                <a href="add-masterlist.php">Add Deliverable</a>
+                                <a href="add-master.php?type=deliverable">Add Deliverable</a>
                             </div>
                             <div class="asset-inner">
                                 <table>
@@ -98,12 +110,15 @@
                             </nav>
                         </div>
                     </div>
-
+                    ';
+                    }
+                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) {
+                        echo '
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                         <div class="product-status-wrap drp-lst">
                             <h4>Team List</h4>
                             <div class="add-product">
-                                <a href="add-masterlist.php">Add Team</a>
+                                <a href="add-master.php?type=team">Add Team</a>
                             </div>
                             <div class="asset-inner">
                                 <table>
@@ -135,8 +150,9 @@
                             </nav>
                         </div>
                     </div>
-
-
+                    ';
+                    }
+                    ?>
 
                 </div>
 
@@ -146,11 +162,14 @@
 
             <div class="container-fluid mg-t-15">
                 <div class="row">
+                    <?php
+                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) {
+                        echo '
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                         <div class="product-status-wrap drp-lst">
                             <h4>Task Type List</h4>
                             <div class="add-product">
-                                <a href="add-masterlist.php">Add Task Type</a>
+                                <a href="add-master.php?type=task">Add Task Type</a>
                             </div>
                             <div class="asset-inner">
                                 <table>
@@ -189,12 +208,15 @@
                             </nav>
                         </div>
                     </div>
-
+                ';
+                    }
+                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TICKET_REASON]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TICKET_REASON]) {
+                        echo '
                     <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                         <div class="product-status-wrap drp-lst">
                             <h4>Ticket Reason</h4>
                             <div class="add-product">
-                                <a href="add-masterlist.php">Add Reason</a>
+                                <a href="add-master.php?type=ticket_reason">Add Reason</a>
                             </div>
                             <div class="asset-inner">
                                 <table>
@@ -214,8 +236,6 @@
                                                 <label for="someSwitchOptionPrimary" class="label-primary"></label>
                                             </div>
                                         </td>
-
-
                                     </tr>
                                 </table>
                             </div>
@@ -233,7 +253,9 @@
                             </nav>
                         </div>
                     </div>
-
+                        ';
+                    }
+                    ?>
                 </div>
 
             </div>
