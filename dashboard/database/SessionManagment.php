@@ -24,10 +24,32 @@ class SessionManagment extends SessionConfig
     {
         $_SESSION[SessionConfig::IS_LOGGED_IN] = $status;
     }
-    private function removeSession()
+    public function removeSession()
     {
         $_SESSION[SessionConfig::IS_LOGGED_IN] = null;
+        unset($_SESSION[SessionConfig::IS_LOGGED_IN]);
         $_SESSION[SessionConfig::USER_DETAILS] = null;
+        unset($_SESSION[SessionConfig::USER_DETAILS]);
+
         $_SESSION[SessionConfig::PRIVILAGS] = null;
+        unset($_SESSION[SessionConfig::PRIVILAGS]);
+        return true;
+    }
+    public function getUserId()
+    {
+
+        if (!isset($_SESSION[SessionConfig::USER_DETAILS]['user_id']))
+            return false;
+
+        return $_SESSION[SessionConfig::USER_DETAILS]['user_id'];
+    }
+
+    public function getUserRole()
+    {
+
+        if (!isset($_SESSION[SessionConfig::USER_DETAILS]['user_role_id']))
+            return false;
+
+        return $_SESSION[SessionConfig::IS_LOGGED_IN]['user_role_id'];
     }
 }

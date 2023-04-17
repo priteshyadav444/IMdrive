@@ -1,4 +1,7 @@
 <?php
+
+use Validation\Validators\Validate;
+
 include 'SessionManagment.php';
 class User
 {
@@ -24,13 +27,13 @@ class User
      */
     public function checkCredential($username, $password, $setSession = false)
     {
-        $sqlQuery = "SELECT * FROM `users` where `email` = ? and `password` = ? LIMIT 0, 1";
-        $stmt = $this->connection->prepare($sqlQuery);
-
-        $stmt->bindValue(1, $username);
-        $stmt->bindValue(2, $password);
-
         try {
+            $sqlQuery = "SELECT * FROM `users` where `email` = ? and `password` = ? LIMIT 0, 1";
+            $stmt = $this->connection->prepare($sqlQuery);
+
+            $stmt->bindValue(1, $username);
+            $stmt->bindValue(2, $password);
+
             $stmt->execute();
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row) {
@@ -78,5 +81,107 @@ class User
 
             die($e->getMessage());
         }
+    }
+
+    private function checkPrivilages($userRoleId, $action)
+    {
+        $allPrilages = $this->getPrivailages($userRoleId);
+        var_dump(isset($allPrilages[$action]));
+        var_dump(($allPrilages[$action] == 1));
+
+        if (isset($allPrilages[$action]) &&  $allPrilages[$action] == 1)
+            return true;
+
+        return false;
+    }
+
+    /**
+     * getUserRole Returns User role id of passed userid
+     *
+     * @param  mixed $userId
+     * @return void
+     */
+    public function getUserRole($userId)
+    {
+        try {
+            $sqlQuery = "SELECT `user_role_id` FROM `users` where `user_id` = ?";
+            $stmt = $this->connection->prepare($sqlQuery);
+
+            $stmt->bindValue(1, $userId);
+
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_COLUMN);
+
+            if (!$row) {
+                return false;
+            }
+
+            return $row;
+        } catch (PDOException $e) {
+            die($e->getMessage());
+        }
+    }
+
+
+
+
+    public function createDeliverable($deliverableName, $action)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        // validating action from database of Session User 
+        if ($this->checkPrivilages($this->getUserRole($userId), $action) != false) {
+            try {
+                $sqlQuery = "INSERT INTO `deliverables`( `deliverable_name`, `created_by_admin_id`) VALUES (?, ?)";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $deliverableName);
+                $stmt->bindValue(2, $userId);
+
+                return $stmt->execute();
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function createTeam($teamName, $action)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        // validating action from database of Session User 
+        if ($this->checkPrivilages($this->getUserRole($userId), $action) != false) {
+            try {
+                $sqlQuery = "INSERT INTO `teams`( `created_by_admin_id`, `team_name`) VALUES (?, ?)";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $userId);
+                $stmt->bindValue(2, $teamName);
+
+                return $stmt->execute();
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function createTasktype($teamName, $action)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        // validating action from database of Session User 
+        if ($this->checkPrivilages($this->getUserRole($userId), $action) != false) {
+            try {
+                $sqlQuery = "INSERT INTO `tasks`( `created_by_admin_id`, `team_name`) VALUES (?, ?)";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $teamName);
+                $stmt->bindValue(2, $userId);
+
+                return $stmt->execute();
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
     }
 }
