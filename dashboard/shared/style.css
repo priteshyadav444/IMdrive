@@ -4773,3 +4773,8 @@ div#sparklinehome canvas {
 .mg-t-20 {
     margin-top: 3rem;
 }
+
+
+.index{
+   z-index: 1000;
+}

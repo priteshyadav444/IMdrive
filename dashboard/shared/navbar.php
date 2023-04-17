@@ -16,6 +16,8 @@
                                 <ul class="nav navbar-nav mai-top-nav">
                                     <li class="nav-item"><a href="#" class="nav-link">Home</a>
                                     </li>
+                                    <li class="nav-item"><a href="../shared/logout.php" class="nav-link">Logout</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -26,3 +28,10 @@
         </div>
     </div>
 </div>
+
+
+<?php
+
+
+
+
