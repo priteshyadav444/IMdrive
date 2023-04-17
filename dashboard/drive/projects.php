@@ -98,7 +98,7 @@
                                             <td>
 
                                                 <button class="btn btn-link">
-                                                    <a href="projectview.php">Project A</a>
+                                                    <a href="deliverable.php">Project A</a>
                                                 </button>
                                             </td>
                                             <td>Here is Description more<button class="btn btn-link"><i class="glyphicon glyphicon-info-sign"></i></button></td>
