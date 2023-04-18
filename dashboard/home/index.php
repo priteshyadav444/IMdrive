@@ -1,7 +1,3 @@
-<?php
-@session_start();
-require_once '../shared/check-login.php';
-?>
 <!doctype html>
 <html class="no-js" lang="en">
 
