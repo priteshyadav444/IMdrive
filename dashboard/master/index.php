@@ -12,7 +12,14 @@ require_once '../shared/check-login.php'; ?>
 
     <?php
     require_once '../shared/head-link.php';
+    require_once "../database/Connection.php";
+    require_once "../database/User.php";
     ?>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script type=" text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+    <script type=" text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.js"></script>
 
 
 
@@ -25,8 +32,6 @@ require_once '../shared/check-login.php'; ?>
     <!-- Start Left menu area -->
     <?php
     include_once '../shared/left-sidebar.php';
-
-
     ?>
     <!-- End Left menu area -->
     <!-- Start Welcome area -->
@@ -36,7 +41,47 @@ require_once '../shared/check-login.php'; ?>
             <?php include_once '../shared/navbar.php'; ?>
 
             <!-- Mobile Menu start -->
+            <?php
+            $connection = new Connection();
+            $user = new User($connection->getConnection());
 
+
+            $hasPermissionToViewDeliverable = false;
+            $hasPermissionToCreateDeliverable = false;
+            $hasPermissionToUpdateDeliverable = false;
+
+            $hasPermissionToViewTask = false;
+            $hasPermissionToCreateTask = false;
+            $hasPermissionToUpdateTask = false;
+
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) {
+                $hasPermissionToViewDeliverable = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_DELIVERABLE]) {
+                $hasPermissionToCreateDeliverable = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) {
+                $hasPermissionToUpdateDeliverable = true;
+            }
+
+
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) {
+                $hasPermissionToViewTask = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_DELIVERABLE]) {
+                $hasPermissionToCreateTask = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) {
+                $hasPermissionToUpdateTask = true;
+            }
+
+            ?>
             <!-- Mobile Menu end -->
             <div class="breadcome-area mg-t-20">
                 <div class="container-fluid">
@@ -69,32 +114,61 @@ require_once '../shared/check-login.php'; ?>
         </div>
 
         <div class="product-status mg-b-15">
+            <!-- Deliverable List -->
             <div class="container-fluid">
                 <div class="row">
                     <?php
-                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) {
+                    if ($hasPermissionToViewDeliverable) {
                         echo '
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="product-status-wrap drp-lst">
                             <h4>Deliverable List</h4>
                             <div class="add-product">
-                                <a href="add-master.php?type=deliverable">Add Deliverable</a>
+                            ';
+                        if ($hasPermissionToCreateDeliverable) {
+                            echo '<a href="add-master.php?type=deliverable">Add Deliverable</a>';
+                        }
+                        echo '
                             </div>
                             <div class="asset-inner">
-                                <table>
-                                    <tr>
-                                        <th>Deliverable Name</th>
-                                        <th>Edit</th>
 
-                                    </tr>
-                                    <tr>
-                                        <td>Customer Login Form</td>
-                                        <td>
-                                            <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                                        </td>
+                                <table id="deliverableTable" >
+                                    <thead>
+                                        <tr>
+                                            <th>Deliverable Name</th>
+                                            ';
+                        if ($hasPermissionToUpdateDeliverable) {
+                            echo "<th>Edit</th>";
+                        }
+                        echo '
+                                          
+                                        </tr>
+                                    </thead>
+                             
+                        ';
+                        $row = $user->getAllDelverable();
+                        foreach ($row as $data) {
+                            echo "<tr id=" . $data['deliverable_id'] . "> 
+                            <td>  
+                            <span class='editSpan deliverable_name'>" . $data['deliverable_name'] . "</span>
+                            <input class='form-control editInput deliverable_name' type='text' name='deliverable_name' value=" . $data['deliverable_name'] . " style='display: none;'>
+                            </td>
+                            <td>
+                            ";
+                            if ($hasPermissionToUpdateDeliverable) {
+                                echo "<button data-toggle='tooltip' title='Edit' class='pd-setting-ed editBtn'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
+                                <button type='button' class='btn btn-success saveBtn' style='display: none;'>Save</button>
+                                <button type='button' class='btn btn-secondary cancelBtn' style='display: none;'>Cancel</button>";
+                            }
+                            echo "
+                            </td>
+                            </tr>";
+                        }
 
-                                    </tr>
+                        echo '
+                                 
                                 </table>
+
                             </div>
 
                         </div>
@@ -112,29 +186,69 @@ require_once '../shared/check-login.php'; ?>
                     </div>
                     ';
                     }
-                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) {
+                    ?>
+                </div>
+
+            </div>
+
+                    <!-- Task List -->
+            <div class="container-fluid mg-t-15">
+                <div class="row">
+                    <?php
+                    if ($hasPermissionToViewTask) {
                         echo '
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="product-status-wrap drp-lst">
-                            <h4>Team List</h4>
+                        <h4>Task Type List</h4>
                             <div class="add-product">
-                                <a href="add-master.php?type=team">Add Team</a>
+                            ';
+                        if ($hasPermissionToCreateTask) {
+                            echo '<a href="add-master.php?type=task">Add Task Type</a>';
+                        }
+                        echo '
                             </div>
                             <div class="asset-inner">
-                                <table>
-                                    <tr>
-                                        <th>Team Name</th>
-                                        <th>Edit</th>
 
-                                    </tr>
-                                    <tr>
-                                        <td>PHP Team</td>
-                                        <td>
-                                            <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                                        </td>
+                                <table id="taskTable" >
+                                    <thead>
+                                        <tr>
+                                        <th>Task Type Name</th>
+                                            ';
+                        if ($hasPermissionToUpdateTask) {
+                            echo "<th>Edit</th>";
+                        }
+                        echo '
+                                    <th>Status</th> 
+                                        </tr>
+                                    </thead>
+                             
+                        ';
+                        $row = $user->getAllTask();
+                        foreach ($row as $data) {
+                            echo "<tr id=" . $data['task_type_id'] . "> 
+                            <td>  
+                            <span class='editSpan task_type_name'>" . $data['task_type_name'] . "</span>
+                            <input class='form-control editInput task_type_name' type='text' name='task_type_name' value=" . $data['task_type_name'] . " style='display: none;'>
+                            </td>
+                            <td>
+                                <button data-toggle='tooltip' title='Edit' class='pd-setting-ed'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
+                            </td>
+                            <td>
+                            ";
+                            if ($hasPermissionToUpdateTask) {
+                                echo "<button data-toggle='tooltip' title='Edit' class='pd-setting-ed editBtn'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
+                                <button type='button' class='btn btn-success saveBtn' style='display: none;'>Save</button>
+                                <button type='button' class='btn btn-secondary cancelBtn' style='display: none;'>Cancel</button>";
+                            }
+                            echo "
+                            </td>
+                            </tr>";
+                        }
 
-                                    </tr>
+                        echo '
+                                 
                                 </table>
+
                             </div>
 
                         </div>
@@ -154,13 +268,16 @@ require_once '../shared/check-login.php'; ?>
                     }
                     ?>
 
+
+
+
                 </div>
 
             </div>
 
 
 
-            <div class="container-fluid mg-t-15">
+            <div class="container-fluid mg-t-20">
                 <div class="row">
                     <?php
                     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) {
@@ -193,20 +310,22 @@ require_once '../shared/check-login.php'; ?>
 
                                     </tr>
                                 </table>
+
+                                <div class="custom-pagination">
+                                <nav aria-label="Page navigation example">
+                                    <ul class="pagination">
+                                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
                             </div>
 
                         </div>
-                        <div class="custom-pagination">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination">
-                                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                                </ul>
-                            </nav>
-                        </div>
+                       
                     </div>
                 ';
                     }
@@ -259,11 +378,96 @@ require_once '../shared/check-login.php'; ?>
                 </div>
 
             </div>
+            <?php include_once '../shared/footer.php'; ?>
+
         </div>
 
 
-        <?php include_once '../shared/footer.php'; ?>
         <?php include_once '../shared/footer-link.php'; ?>
+
+        <script type="text/javascript">
+            $.noConflict();
+
+
+
+            $('#deliverableTable').DataTable({
+                "paging": false
+            });
+
+            $('.editBtn').on('click', function() {
+
+                $(this).closest("tr").find(".editSpan").hide();
+
+                //show edit input
+                $(this).closest("tr").find(".editInput").show();
+
+                //hide edit button
+                $(this).closest("tr").find(".editBtn").hide();
+
+                //hide delete button
+                $(this).closest("tr").find(".deleteBtn").hide();
+
+                //show save button
+                $(this).closest("tr").find(".saveBtn").show();
+
+                //show cancel button
+                $(this).closest("tr").find(".cancelBtn").show();
+            });
+
+            $('.saveBtn').on('click', function() {
+                $('#userData').css('opacity', '.5');
+
+                var trObj = $(this).closest("tr");
+                var ID = $(this).closest("tr").attr('id');
+                var inputData = $(this).closest("tr").find(".editInput").serialize();
+                $.ajax({
+                    type: 'POST',
+                    url: 'update.php',
+                    dataType: "json",
+                    data: 'action=edit&id=' + ID + '&' + inputData,
+                    success: function(response) {
+                        if (response.status == 1) {
+
+                            trObj.find(".editSpan.deliverable_name").text(response.data);
+                            trObj.find(".editInput.deliverable_name").val(response.data);
+
+                            trObj.find(".editInput").hide();
+                            trObj.find(".editSpan").show();
+                            trObj.find(".saveBtn").hide();
+                            trObj.find(".cancelBtn").hide();
+                            trObj.find(".editBtn").show();
+                            trObj.find(".deleteBtn").show();
+                        } else {
+                            alert(response.msg);
+                        }
+                        $('#userData').css('opacity', '');
+                    }
+                });
+            });
+
+            $('.cancelBtn').on('click', function() {
+                //hide & show buttons
+                $(this).closest("tr").find(".saveBtn").hide();
+                $(this).closest("tr").find(".cancelBtn").hide();
+                $(this).closest("tr").find(".confirmBtn").hide();
+                $(this).closest("tr").find(".editBtn").show();
+                $(this).closest("tr").find(".deleteBtn").show();
+
+                //hide input and show values
+                $(this).closest("tr").find(".editInput").hide();
+                $(this).closest("tr").find(".editSpan").show();
+            });
+
+            $('.deleteBtn').on('click', function() {
+                //hide edit & delete button
+                $(this).closest("tr").find(".editBtn").hide();
+                $(this).closest("tr").find(".deleteBtn").hide();
+
+                //show confirm & cancel button
+                $(this).closest("tr").find(".confirmBtn").show();
+                $(this).closest("tr").find(".cancelBtn").show();
+            });
+        </script>
 </body>
 
 </html>
