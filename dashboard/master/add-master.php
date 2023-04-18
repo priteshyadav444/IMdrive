@@ -1,4 +1,4 @@
-<?php 
+<?php
 @session_start();
 require_once '../shared/check-login.php';
 ?>
@@ -28,7 +28,7 @@ require_once '../shared/check-login.php';
 
   $obj = new FormValidator();
 
-  // on submit handler
+  // on submit deliverabl handler
   if (isset($_POST['submit_deliverable'])) {
     $validations = [
       'name' => 'required|string',
@@ -39,18 +39,68 @@ require_once '../shared/check-login.php';
       $connection = new Connection();
       $user = new User($connection->getConnection());
 
-      $isValid = $user->createDeliverable($obj->senitizeInput($_POST['name']), Privilege::CREATE_DELIVERABLE);
-
-      // var_dump($isValid);
-      // if (!$isValid) {
-      //   $obj->setError($isValid, "custom");
-      // } else {
-      // $redirectPageUrl = "../master/";
-      // header('Location: ' . $redirectPageUrl);
-      // var_dump($_SESSION[SessionConfig::PRIVILAGS]);
-      // }
+      $isValid = $user->createDeliverable($obj->senitizeInput($_POST['name']));
     }
   }
+
+  // on submit team handler
+  if (isset($_POST['submit_team'])) {
+    $validations = [
+      'name' => 'required|string',
+    ];
+    // if all validation Passed
+    if (!$obj->validate($_POST, $validations)->isError()) {
+
+      $connection = new Connection();
+      $user = new User($connection->getConnection());
+
+      $isValid = $user->createTeam($obj->senitizeInput($_POST['name']));
+
+      if (!$isValid) {
+        $obj->setError("Something Went Wrong", "custom");
+      }
+    }
+  }
+
+  // on submit ticket handler
+  if (isset($_POST['submit_task'])) {
+    $validations = [
+      'name' => 'required|string',
+    ];
+    // if all validation Passed
+    if (!$obj->validate($_POST, $validations)->isError()) {
+
+      $connection = new Connection();
+      $user = new User($connection->getConnection());
+
+      $isValid = $user->createTasktype($obj->senitizeInput($_POST['name']));
+
+      if (!$isValid) {
+        $obj->setError("Something Went Wrong", "custom");
+      }
+    }
+  }
+
+  // on submit ticket handler
+  if (isset($_POST['submit_ticket_reason'])) {
+    $validations = [
+      'name' => 'required|string',
+    ];
+    // if all validation Passed
+    if (!$obj->validate($_POST, $validations)->isError()) {
+
+      $connection = new Connection();
+      $user = new User($connection->getConnection());
+
+      $isValid = $user->createReason($obj->senitizeInput($_POST['name']));
+
+      if (!$isValid) {
+        $obj->setError("Something Went Wrong", "custom");
+      }
+    }
+  }
+
+
   ?>
   <!--[if lt IE 8]>
 		<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
@@ -159,9 +209,13 @@ require_once '../shared/check-login.php';
                                 foreach ($obj->all() as $error)
                                   echo "<li>$error</li>";
                                 echo '</div>';
+                              } else if (isset($isValid) && $isValid  && isset($_POST['submit_deliverable'])) {
+                                echo '<div class="alert alert-success" role="alert">';
+                                echo "<li>Deliverable Created </li>";
+                                echo '</div>';
                               }
                               ?>
-                              <form action="add-master.php" method="post">
+                              <form action="add-master.php?type=deliverable" method="post">
                                 <div class="form-group">
                                   <input type="text" class="form-control" name="name" placeholder="Enter New Deliverable">
                                 </div>
@@ -181,33 +235,24 @@ require_once '../shared/check-login.php';
                       <div class="review-content-section">
                         <div class="row">
                           <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                            <form action="add-master.php" method="post">
-                              <div class="devit-card-custom">
+                            <div class="devit-card-custom">
+                              <?php
+                              if ($obj->isError() != false && isset($_POST['submit_team'])) {
+                                echo '<div class="alert alert-danger" role="alert">';
+                                foreach ($obj->all() as $error)
+                                  echo "<li>$error</li>";
+                                echo '</div>';
+                              } else if (isset($isValid) && $isValid  && isset($_POST['submit_team'])) {
+                                echo '<div class="alert alert-success" role="alert">';
+                                echo "<li>Team Created </li>";
+                                echo '</div>';
+                              }
+                              ?>
+                              <form action="add-master.php?type=team" method="post">
                                 <div class="form-group">
-                                  <input type="text" class="form-control" name="team" placeholder="Enter New Team Name">
+                                  <input type="text" class="form-control" name="name" placeholder="Enter New Team">
                                 </div>
-                                <button type="submit" class="btn btn-primary waves-effect waves-light" value="submit_team">Create New Team</button>
-                            </form>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- <div class="product-tab-list tab-pane fade<?php if ($type == "task") echo " active in"; ?>" id="task">
-                  <div class="row">
-                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                      <div class="review-content-section">
-                        <div class="row">
-                          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                              <form action="add-master.php" method="post">
-                                <div class="devit-card-custom">
-                                  <div class="form-group">
-                                    <input type="text" class="form-control" name="task" placeholder="Enter New Task Type">
-                                  </div>
-                                  <button type="submit" class="btn btn-primary waves-effect waves-light" value="submit_team">Create New Task</button>
+                                <button type="submit" class="btn btn-primary" value="submit_team" name="submit_team">Create New Team</button>
                               </form>
                             </div>
                           </div>
@@ -217,7 +262,98 @@ require_once '../shared/check-login.php';
                   </div>
                 </div>
 
-                <div class="product-tab-list tab-pane fade<?php if ($type == "ticket_reason") echo " active in"; ?>" id="reason">
+                <div class="product-tab-list tab-pane fade<?php if ($type == "task") echo " active in"; ?>" id="task">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                      <div class="review-content-section">
+                        <div class="row">
+                          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="devit-card-custom">
+                              <?php
+                              if ($obj->isError() != false && isset($_POST['submit_task'])) {
+                                echo '<div class="alert alert-danger" role="alert">';
+                                foreach ($obj->all() as $error)
+                                  echo "<li>$error</li>";
+                                echo '</div>';
+                              } else if (isset($isValid) && $isValid  && isset($_POST['submit_task'])) {
+                                echo '<div class="alert alert-success" role="alert">';
+                                echo "<li>Task Created </li>";
+                                echo '</div>';
+                              }
+                              ?>
+                              <form action="add-master.php?type=task" method="post">
+                                <div class="form-group">
+                                  <input type="text" class="form-control" name="name" placeholder="Enter New Task">
+                                </div>
+                                <button type="submit" class="btn btn-primary" value="submit_task" name="submit_task">Create New Task</button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="product-tab-list tab-pane fade<?php if ($type == "ticket_reason") echo " active in"; ?>" id="ticket_reason">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                      <div class="review-content-section">
+                        <div class="row">
+                          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="devit-card-custom">
+                              <?php
+                              if ($obj->isError() != false && isset($_POST['submit_ticket_reason'])) {
+                                echo '<div class="alert alert-danger" role="alert">';
+                                foreach ($obj->all() as $error)
+                                  echo "<li>$error</li>";
+                                echo '</div>';
+                              } else if (isset($isValid) && $isValid  && isset($_POST['submit_ticket_reason'])) {
+                                echo '<div class="alert alert-success" role="alert">';
+                                echo "<li>Reason Created </li>";
+                                echo '</div>';
+                              }
+                              ?>
+                              <form action="add-master.php?type=ticket_reason" method="post">
+                                <div class="form-group">
+                                  <input type="text" class="form-control" name="name" placeholder="Enter New Reason">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" value="submit_ticket_reason" name="submit_ticket_reason">Create New Task</button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+
+
+
+                <!-- <div class="product-tab-list tab-pane fade<?php if ($type == "task") echo " active in"; ?>" id="task">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                      <div class="review-content-section">
+                        <div class="row">
+                          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <form action="add-master.php" method="post">
+                              <div class="devit-card-custom">
+                                <div class="form-group">
+                                  <input type="text" class="form-control" name="task" placeholder="Enter New Task Type">
+                                </div>
+                                <button type="submit" class="btn btn-primary waves-effect waves-light" value="submit_team">Create New Task</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div> -->
+
+                <!-- <div class="product-tab-list tab-pane fade<?php if ($type == "ticket_reason") echo " active in"; ?>" id="reason">
                   <div class="row">
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                       <div class="review-content-section">
