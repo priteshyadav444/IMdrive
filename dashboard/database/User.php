@@ -3,6 +3,7 @@
 use Validation\Validators\Validate;
 
 include 'SessionManagment.php';
+include_once '../Config/Privilege.php';
 class User
 {
     private $connection;
@@ -83,11 +84,9 @@ class User
         }
     }
 
-    private function checkPrivilages($userRoleId, $action)
+    public function checkPrivilages($userRoleId, $action)
     {
         $allPrilages = $this->getPrivailages($userRoleId);
-        var_dump(isset($allPrilages[$action]));
-        var_dump(($allPrilages[$action] == 1));
 
         if (isset($allPrilages[$action]) &&  $allPrilages[$action] == 1)
             return true;
@@ -125,11 +124,11 @@ class User
 
 
 
-    public function createDeliverable($deliverableName, $action)
+    public function createDeliverable($deliverableName)
     {
         $userId = $this->sessionManagment->getUserId();
         // validating action from database of Session User 
-        if ($this->checkPrivilages($this->getUserRole($userId), $action) != false) {
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_DELIVERABLE) != false) {
             try {
                 $sqlQuery = "INSERT INTO `deliverables`( `deliverable_name`, `created_by_admin_id`) VALUES (?, ?)";
                 $stmt = $this->connection->prepare($sqlQuery);
@@ -145,17 +144,36 @@ class User
         return false;
     }
 
-    public function createTeam($teamName, $action)
+    public function createTeam($teamName)
     {
         $userId = $this->sessionManagment->getUserId();
         // validating action from database of Session User 
-        if ($this->checkPrivilages($this->getUserRole($userId), $action) != false) {
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_TEAM) != false) {
             try {
                 $sqlQuery = "INSERT INTO `teams`( `created_by_admin_id`, `team_name`) VALUES (?, ?)";
                 $stmt = $this->connection->prepare($sqlQuery);
 
                 $stmt->bindValue(1, $userId);
                 $stmt->bindValue(2, $teamName);
+                return $stmt->execute();
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function createTasktype($taskName,)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        // validating action from database of Session User 
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_TASK) != false) {
+            try {
+                $sqlQuery = "INSERT INTO `task_types`( `task_type_name`, `created_by_user_id`) VALUES (?, ?)";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $taskName);
+                $stmt->bindValue(2, $userId);
 
                 return $stmt->execute();
             } catch (PDOException $e) {
@@ -165,19 +183,192 @@ class User
         return false;
     }
 
-    public function createTasktype($teamName, $action)
+    public function createReason($reason)
     {
         $userId = $this->sessionManagment->getUserId();
         // validating action from database of Session User 
-        if ($this->checkPrivilages($this->getUserRole($userId), $action) != false) {
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_TICKET_REASON) != false) {
             try {
-                $sqlQuery = "INSERT INTO `tasks`( `created_by_admin_id`, `team_name`) VALUES (?, ?)";
+                $sqlQuery = "INSERT INTO `ticket_reasons`( `content`, `created_by_user_id`) VALUES (?, ?)";
                 $stmt = $this->connection->prepare($sqlQuery);
 
-                $stmt->bindValue(1, $teamName);
+                $stmt->bindValue(1, $reason);
                 $stmt->bindValue(2, $userId);
 
                 return $stmt->execute();
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+    public function getAllDelverable()
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_DELIVERABLE) != false) {
+            try {
+                $sqlQuery = "SELECT `deliverable_id`, `deliverable_name` FROM `deliverables` order by `created_at`";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->execute();
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function updateDeliverable($deliverableName, $deliverableId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_DELIVERABLE) != false) {
+            try {
+                $sqlQuery = "UPDATE `deliverables` SET `deliverable_name`=? WHERE `deliverable_id` = ?";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $deliverableName);
+                $stmt->bindValue(2, $deliverableId);
+
+                if ($stmt->execute()) {
+                    return $deliverableName;
+                }
+                return false;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+
+    public function getAllTask()
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_TASK) != false) {
+            try {
+                $sqlQuery = "SELECT `task_type_id`, `task_type_name`, `task_type_status` FROM `task_types`";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->execute();
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function updateTaskType($taskName, $taskId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_TASK) != false) {
+            try {
+                $sqlQuery = "UPDATE `task_types` SET `task_type_name`=? WHERE `task_type_id` = ?";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $taskName);
+                $stmt->bindValue(2, $taskId);
+
+                if ($stmt->execute()) {
+                    return $taskName;
+                }
+                return false;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function getAllTeam()
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_TEAM) != false) {
+            try {
+                $sqlQuery = "SELECT `team_id`, `team_name` FROM `teams`";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->execute();
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function updateTeam($teamName, $teamId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_TEAM) != false) {
+            try {
+                $sqlQuery = "UPDATE `teams` SET `team_name`=? WHERE `team_id` = ?";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $teamName);
+                $stmt->bindValue(2, $teamId);
+                if ($stmt->execute()) {
+                    return $teamName;
+                }
+                return false;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+
+    public function getAllTicketReason()
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_TICKET_REASON) != false) {
+            try {
+                $sqlQuery = "SELECT `reason_id`, `content`, `reason_status` FROM `ticket_reasons`";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->execute();
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+
+    public function updateTicketReason($reasonContent, $reasonId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_TICKET_REASON) != false) {
+            try {
+                $sqlQuery = "UPDATE `ticket_reasons` SET `content`=? WHERE `reason_id` = ?";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $reasonContent);
+                $stmt->bindValue(2, $reasonId);
+                
+                if ($stmt->execute()) {
+                    return $reasonContent;
+                }
+                return false;
             } catch (PDOException $e) {
                 die($e->getMessage());
             }
