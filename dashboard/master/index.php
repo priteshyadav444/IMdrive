@@ -50,9 +50,9 @@ require_once '../shared/check-login.php'; ?>
             $hasPermissionToCreateDeliverable = false;
             $hasPermissionToUpdateDeliverable = false;
 
-            $hasPermissionToViewTask = false;
-            $hasPermissionToCreateTask = false;
-            $hasPermissionToUpdateTask = false;
+
+
+
 
 
             if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) {
@@ -67,6 +67,10 @@ require_once '../shared/check-login.php'; ?>
                 $hasPermissionToUpdateDeliverable = true;
             }
 
+            $hasPermissionToViewTask = false;
+            $hasPermissionToCreateTask = false;
+            $hasPermissionToUpdateTask = false;
+
 
 
             if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) {
@@ -79,6 +83,39 @@ require_once '../shared/check-login.php'; ?>
 
             if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) {
                 $hasPermissionToUpdateTask = true;
+            }
+
+            $hasPermissionToViewTeam = false;
+            $hasPermissionToCreateTeam = false;
+            $hasPermissionToUpdateTeam = false;
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) {
+                $hasPermissionToViewTeam = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_TEAM]) {
+                $hasPermissionToCreateTeam = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_TEAM]) {
+                $hasPermissionToUpdateTeam = true;
+            }
+
+
+            $hasPermissionToViewTicket = false;
+            $hasPermissionToCreateTicket = false;
+            $hasPermissionToUpdateTicket = false;
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TICKET_REASON]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TICKET_REASON]) {
+                $hasPermissionToViewTicket = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_TICKET_REASON]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_TICKET_REASON]) {
+                $hasPermissionToCreateTicket = true;
+            }
+
+            if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_TICKET_REASON]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_TICKET_REASON]) {
+                $hasPermissionToUpdateTicket = true;
             }
 
             ?>
@@ -151,7 +188,7 @@ require_once '../shared/check-login.php'; ?>
                             echo "<tr id=" . $data['deliverable_id'] . "> 
                             <td>  
                             <span class='editSpan deliverable_name'>" . $data['deliverable_name'] . "</span>
-                            <input class='form-control editInput deliverable_name' type='text' name='deliverable_name' value=" . $data['deliverable_name'] . " style='display: none;'>
+                            <input class='form-control editInput deliverable_name' type='text' name='deliverable_name' value='" . $data['deliverable_name'] . "' style='display: none;'>
                             </td>
                             <td>
                             ";
@@ -191,7 +228,85 @@ require_once '../shared/check-login.php'; ?>
 
             </div>
 
-                    <!-- Task List -->
+
+            <!-- Team List -->
+            <div class="container-fluid mg-t-15">
+                <div class="row">
+                    <?php
+                    if ($hasPermissionToViewTeam) {
+                        echo '
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="product-status-wrap drp-lst">
+                            <h4>Team List</h4>
+                            <div class="add-product">
+                            ';
+                        if ($hasPermissionToCreateTeam) {
+                            echo '<a href="add-master.php?type=team">Add Team</a>';
+                        }
+                        echo '
+                            </div>
+                            <div class="asset-inner">
+
+                                <table id="deliverableTable" >
+                                    <thead>
+                                        <tr>
+                                            <th>Team Name</th>
+                                            ';
+                        if ($hasPermissionToUpdateTeam) {
+                            echo "<th>Edit</th>";
+                        }
+                        echo '
+                                          
+                                        </tr>
+                                    </thead>
+                             
+                        ';
+                        $row = $user->getAllTeam();
+                        foreach ($row as $data) {
+                            echo "<tr id=" . $data['team_id'] . "> 
+                            <td>  
+                            <span class='editSpan team_name'>" . $data['team_name'] . "</span>
+                            <input class='form-control editInput team_name' type='text' name='team_name' value='" . $data['team_name'] . "' style='display: none;'>
+                            </td>
+                            <td>
+                            ";
+                            if ($hasPermissionToUpdateTeam) {
+                                echo "<button data-toggle='tooltip' title='Edit' class='pd-setting-ed editBtn'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
+                                <button type='button' class='btn btn-success saveBtn' style='display: none;'>Save</button>
+                                <button type='button' class='btn btn-secondary cancelBtn' style='display: none;'>Cancel</button>";
+                            }
+                            echo "
+                            </td>
+                            </tr>";
+                        }
+
+                        echo '
+                                 
+                                </table>
+
+                            </div>
+
+                        </div>
+                        <div class="custom-pagination">
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination">
+                                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    ';
+                    }
+                    ?>
+                </div>
+
+            </div>
+
+            <!-- Task List -->
             <div class="container-fluid mg-t-15">
                 <div class="row">
                     <?php
@@ -228,20 +343,129 @@ require_once '../shared/check-login.php'; ?>
                             echo "<tr id=" . $data['task_type_id'] . "> 
                             <td>  
                             <span class='editSpan task_type_name'>" . $data['task_type_name'] . "</span>
-                            <input class='form-control editInput task_type_name' type='text' name='task_type_name' value=" . $data['task_type_name'] . " style='display: none;'>
+                            <input class='form-control editInput task_type_name' type='text' name='task_type_name' value='" . $data['task_type_name'] . "' style='display: none;'>
                             </td>
-                            <td>
-                                <button data-toggle='tooltip' title='Edit' class='pd-setting-ed'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
-                            </td>
-                            <td>
+                           
+                           
                             ";
                             if ($hasPermissionToUpdateTask) {
-                                echo "<button data-toggle='tooltip' title='Edit' class='pd-setting-ed editBtn'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
+                                $checkBoxState = "unchecked";
+                                if ($data['task_type_status']) {
+                                    $checkBoxState =  "checked";
+                                }
+                                echo "  
+                                <td>
+                                <div class='material-switch'>
+                                                <input id='someSwitchOptionPrimary{$data['task_type_id']}'  class='onToggle task_type_status' name='someSwitchOption{$data['task_type_id']}' type='checkbox' " . $checkBoxState . " />
+                                                <label for='someSwitchOptionPrimary{$data['task_type_id']}' class='label-primary'></label>
+                                </div>
+                                </td>
+                                <td>
+                                <button data-toggle='tooltip' title='Edit' class='pd-setting-ed editBtn'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
                                 <button type='button' class='btn btn-success saveBtn' style='display: none;'>Save</button>
-                                <button type='button' class='btn btn-secondary cancelBtn' style='display: none;'>Cancel</button>";
+                                <button type='button' class='btn btn-secondary cancelBtn' style='display: none;'>Cancel</button>
+                                </td>
+                                ";
                             }
                             echo "
+                         
+                            </tr>";
+                        }
+
+                        echo '
+                                 
+                                </table>
+
+                            </div>
+
+                        </div>
+                        <div class="custom-pagination">
+                            <nav aria-label="Page navigation example">
+                                <ul class="pagination">
+                                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    ';
+                    }
+                    ?>
+
+
+
+
+                </div>
+
+            </div>
+
+
+            <!-- Ticket List List -->
+            <div class="container-fluid mg-t-15">
+                <div class="row">
+                    <?php
+                    if ($hasPermissionToViewTicket) {
+                        echo '
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="product-status-wrap drp-lst">
+                        <h4>Ticket Reason</h4>
+                            <div class="add-product">
+                            ';
+                        if ($hasPermissionToCreateTicket) {
+                            echo '<a href="add-master.php?type=ticket_reason">Add Reason</a>';
+                        }
+                        echo '
+                            </div>
+                            <div class="asset-inner">
+
+                                <table id="taskTable" >
+                                    <thead>
+                                        <tr>
+                                        <th>Reason</th>
+                                            ';
+                        if ($hasPermissionToUpdateTicket) {
+                            echo "<th>Edit</th>";
+                        }
+                        echo '
+                                    <th>Status</th> 
+                                        </tr>
+                                    </thead>
+                             
+                        ';
+                        $row = $user->getAllTicketReason();
+                        foreach ($row as $data) {
+                            echo "<tr id=" . $data['reason_id'] . "> 
+                            <td>  
+                            <span class='editSpan content'>" . $data['content'] . "</span>
+                            <input class='form-control editInput content' type='text' name='content' value='" . $data['content'] . "' style='display: none;'>
                             </td>
+                           
+                           
+                            ";
+                            if ($hasPermissionToUpdateTask) {
+                                $checkBoxState = "unchecked";
+                                if ($data['reason_status']) {
+                                    $checkBoxState =  "checked";
+                                }
+                                echo "  
+                                <td>
+                                <div class='material-switch'>
+                                                <input id='someSwitchOptionPrimary{$data['reason_id']}'  class='onToggle task_type_status' name='someSwitchOption{$data['reason_id']}' type='checkbox' " . $checkBoxState . " />
+                                                <label for='someSwitchOptionPrimary{$data['reason_id']}' class='label-primary'></label>
+                                </div>
+                                </td>
+                                <td>
+                                <button data-toggle='tooltip' title='Edit' class='pd-setting-ed editBtn'><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>
+                                <button type='button' class='btn btn-success saveBtn' style='display: none;'>Save</button>
+                                <button type='button' class='btn btn-secondary cancelBtn' style='display: none;'>Cancel</button>
+                                </td>
+                                ";
+                            }
+                            echo "
+                         
                             </tr>";
                         }
 
@@ -277,197 +501,119 @@ require_once '../shared/check-login.php'; ?>
 
 
 
-            <div class="container-fluid mg-t-20">
-                <div class="row">
-                    <?php
-                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TEAM]) {
-                        echo '
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <div class="product-status-wrap drp-lst">
-                            <h4>Task Type List</h4>
-                            <div class="add-product">
-                                <a href="add-master.php?type=task">Add Task Type</a>
-                            </div>
-                            <div class="asset-inner">
-                                <table>
-                                    <tr>
-                                        <th>Task Type Name</th>
-                                        <th>Edit</th>
-                                        <th>Status</th>
-
-                                    </tr>
-                                    <tr>
-                                        <td>Upload Images</td>
-                                        <td>
-                                            <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                                        </td>
-                                        <td>
-                                            <div class="material-switch">
-                                                <input id="someSwitchOptionPrimary" name="someSwitchOption001" type="checkbox" />
-                                                <label for="someSwitchOptionPrimary" class="label-primary"></label>
-                                            </div>
-                                        </td>
-
-                                    </tr>
-                                </table>
-
-                                <div class="custom-pagination">
-                                <nav aria-label="Page navigation example">
-                                    <ul class="pagination">
-                                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                                    </ul>
-                                </nav>
-                            </div>
-                            </div>
-
-                        </div>
-                       
-                    </div>
-                ';
-                    }
-                    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TICKET_REASON]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TICKET_REASON]) {
-                        echo '
-                    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                        <div class="product-status-wrap drp-lst">
-                            <h4>Ticket Reason</h4>
-                            <div class="add-product">
-                                <a href="add-master.php?type=ticket_reason">Add Reason</a>
-                            </div>
-                            <div class="asset-inner">
-                                <table>
-                                    <tr>
-                                        <th>Reason</th>
-                                        <th>Edit</th>
-
-                                    </tr>
-                                    <tr>
-                                        <td>Unable to Upload Images</td>
-                                        <td>
-                                            <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-                                        </td>
-                                        <td>
-                                            <div class="material-switch">
-                                                <input id="someSwitchOptionPrimary" name="someSwitchOption001" type="checkbox" checked />
-                                                <label for="someSwitchOptionPrimary" class="label-primary"></label>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-
-                        </div>
-                        <div class="custom-pagination">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination">
-                                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">1</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                        ';
-                    }
-                    ?>
-                </div>
-
-            </div>
-            <?php include_once '../shared/footer.php'; ?>
-
         </div>
+        <?php include_once '../shared/footer.php'; ?>
+
+    </div>
 
 
-        <?php include_once '../shared/footer-link.php'; ?>
+    <?php include_once '../shared/footer-link.php'; ?>
 
-        <script type="text/javascript">
-            $.noConflict();
+    <script type="text/javascript">
+        $.noConflict();
 
 
 
-            $('#deliverableTable').DataTable({
-                "paging": false
-            });
+        $('#deliverableTable').DataTable({
+            "paging": false
+        });
 
-            $('.editBtn').on('click', function() {
+        $('#taskTable').DataTable({
+            "paging": false
+        });
 
-                $(this).closest("tr").find(".editSpan").hide();
+        $('.editBtn').on('click', function() {
 
-                //show edit input
-                $(this).closest("tr").find(".editInput").show();
+            $(this).closest("tr").find(".editSpan").hide();
 
-                //hide edit button
-                $(this).closest("tr").find(".editBtn").hide();
+            //show edit input
+            $(this).closest("tr").find(".editInput").show();
 
-                //hide delete button
-                $(this).closest("tr").find(".deleteBtn").hide();
+            //hide edit button
+            $(this).closest("tr").find(".editBtn").hide();
 
-                //show save button
-                $(this).closest("tr").find(".saveBtn").show();
+            //hide delete button
+            $(this).closest("tr").find(".deleteBtn").hide();
 
-                //show cancel button
-                $(this).closest("tr").find(".cancelBtn").show();
-            });
+            //show save button
+            $(this).closest("tr").find(".saveBtn").show();
 
-            $('.saveBtn').on('click', function() {
-                $('#userData').css('opacity', '.5');
+            //show cancel button
+            $(this).closest("tr").find(".cancelBtn").show();
+        });
 
-                var trObj = $(this).closest("tr");
-                var ID = $(this).closest("tr").attr('id');
-                var inputData = $(this).closest("tr").find(".editInput").serialize();
-                $.ajax({
-                    type: 'POST',
-                    url: 'update.php',
-                    dataType: "json",
-                    data: 'action=edit&id=' + ID + '&' + inputData,
-                    success: function(response) {
-                        if (response.status == 1) {
+        $('.saveBtn').on('click', function() {
 
-                            trObj.find(".editSpan.deliverable_name").text(response.data);
-                            trObj.find(".editInput.deliverable_name").val(response.data);
+            var trObj = $(this).closest("tr");
+            var ID = $(this).closest("tr").attr('id');
 
-                            trObj.find(".editInput").hide();
-                            trObj.find(".editSpan").show();
-                            trObj.find(".saveBtn").hide();
-                            trObj.find(".cancelBtn").hide();
-                            trObj.find(".editBtn").show();
-                            trObj.find(".deleteBtn").show();
-                        } else {
-                            alert(response.msg);
-                        }
-                        $('#userData').css('opacity', '');
+            var inputData = $(this).closest("tr").find(".editInput").serialize();
+
+            const editEntity = inputData.substring(0, inputData.indexOf("="));
+
+            $.ajax({
+                type: 'POST',
+                url: 'update.php',
+                dataType: "json",
+                data: 'action=edit&id=' + ID + '&' + inputData,
+
+                success: function(response) {
+                    if (response.status == 1) {
+
+                        trObj.find(".editSpan." + editEntity).text(response.data);
+                        trObj.find(".editInput." + editEntity).val(response.data);
+
+                        trObj.find(".editInput").hide();
+                        trObj.find(".editSpan").show();
+                        trObj.find(".saveBtn").hide();
+                        trObj.find(".cancelBtn").hide();
+                        trObj.find(".editBtn").show();
+                        trObj.find(".deleteBtn").show();
+                    } else {
+                        alert(response.msg);
                     }
-                });
+                    $('#userData').css('opacity', '');
+                }
             });
+        });
 
-            $('.cancelBtn').on('click', function() {
-                //hide & show buttons
-                $(this).closest("tr").find(".saveBtn").hide();
-                $(this).closest("tr").find(".cancelBtn").hide();
-                $(this).closest("tr").find(".confirmBtn").hide();
-                $(this).closest("tr").find(".editBtn").show();
-                $(this).closest("tr").find(".deleteBtn").show();
+        $('.cancelBtn').on('click', function() {
+            //hide & show buttons
+            $(this).closest("tr").find(".saveBtn").hide();
+            $(this).closest("tr").find(".cancelBtn").hide();
+            $(this).closest("tr").find(".confirmBtn").hide();
+            $(this).closest("tr").find(".editBtn").show();
+            $(this).closest("tr").find(".deleteBtn").show();
 
-                //hide input and show values
-                $(this).closest("tr").find(".editInput").hide();
-                $(this).closest("tr").find(".editSpan").show();
-            });
+            //hide input and show values
+            $(this).closest("tr").find(".editInput").hide();
+            $(this).closest("tr").find(".editSpan").show();
+        });
 
-            $('.deleteBtn').on('click', function() {
-                //hide edit & delete button
-                $(this).closest("tr").find(".editBtn").hide();
-                $(this).closest("tr").find(".deleteBtn").hide();
+        $('.deleteBtn').on('click', function() {
+            //hide edit & delete button
+            $(this).closest("tr").find(".editBtn").hide();
+            $(this).closest("tr").find(".deleteBtn").hide();
 
-                //show confirm & cancel button
-                $(this).closest("tr").find(".confirmBtn").show();
-                $(this).closest("tr").find(".cancelBtn").show();
-            });
-        </script>
+            //show confirm & cancel button
+            $(this).closest("tr").find(".confirmBtn").show();
+            $(this).closest("tr").find(".cancelBtn").show();
+        });
+
+        $('.onToggle').on('click', function() {
+            //hide edit & delete button
+            var trObj = $(this).closest("tr");
+            var ID = $(this).closest("tr").attr('id');
+
+            console.log(trObj)
+
+            var inputData = $(this).closest("tr").find(".editInput").serialize();
+
+            const editEntity = inputData.substring(0, inputData.indexOf("="));
+            console.log(editEntity);
+            console.log(inputData);
+        });
+    </script>
 </body>
 
 </html>
