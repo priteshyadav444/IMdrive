@@ -354,21 +354,49 @@ class User
     }
 
 
-    public function updateTicketReason($reasonContent, $reasonId)
+    public function createProject($projectDetails)
     {
         $userId = $this->sessionManagment->getUserId();
-        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_TICKET_REASON) != false) {
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_PROJECT) != false) {
             try {
-                $sqlQuery = "UPDATE `ticket_reasons` SET `content`=? WHERE `reason_id` = ?";
+                $sqlQuery = "INSERT INTO `projects` (`created_by_admin_id`, `logo_url`, `name`, `description`, `project_status_id`) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $this->connection->prepare($sqlQuery);
 
-                $stmt->bindValue(1, $reasonContent);
-                $stmt->bindValue(2, $reasonId);
-                
+
+                $createdByAdminId = $userId;
+                $logoUrl = $projectDetails['logo_url'];
+                $name = $projectDetails['name'];
+                $description = $projectDetails['description'];
+                $projectStatusId = $projectDetails['project_status_id'];
+
+                $stmt->bind_param("isssi", $createdByAdminId, $logoUrl, $name, $description, $projectStatusId);
+
                 if ($stmt->execute()) {
-                    return $reasonContent;
+                    return true;
+                    $stmt->close();
                 }
                 return false;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function getAllProject()
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_PROJECT) != false) {
+            try {
+                $sqlQuery = "";
+                $stmt = $this->connection->prepare($sqlQuery);
+                $stmt->execute();
+
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
             } catch (PDOException $e) {
                 die($e->getMessage());
             }
