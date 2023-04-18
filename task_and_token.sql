@@ -45,7 +45,11 @@ CREATE TABLE `task_types`(
     `task_type_id` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `task_type_name` VARCHAR(30) NOT NULL,
     `created_by_user_id` INT UNSIGNED NOT NULL
+    `task_type_status` BOOLEAN DEFAULT true,
 );
+
+ALTER TABLE `task_types`
+ADD CONSTRAINT FOREIGN KEY (`created_by_user_id`) REFERENCES `users`(`user_id`);
 
 
 
