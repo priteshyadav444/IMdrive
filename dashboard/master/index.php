@@ -128,10 +128,11 @@ require_once '../shared/check-login.php'; ?>
                                 <div class="row">
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                         <div class="breadcome-heading">
-                                            <form role="search" class="sr-input-func">
+                                            <h4 class="sr-input-func">Master List</h4>
+                                            <!-- <form role="search" class="sr-input-func">
                                                 <input type="text" placeholder="Search..." class="search-int form-control">
                                                 <a href="#"><i class="fa fa-search"></i></a>
-                                            </form>
+                                            </form> -->
                                         </div>
                                     </div>
                                     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
@@ -247,7 +248,7 @@ require_once '../shared/check-login.php'; ?>
                             </div>
                             <div class="asset-inner">
 
-                                <table id="deliverableTable" >
+                                <table id="teamTable" >
                                     <thead>
                                         <tr>
                                             <th>Team Name</th>
@@ -421,7 +422,7 @@ require_once '../shared/check-login.php'; ?>
                             </div>
                             <div class="asset-inner">
 
-                                <table id="taskTable" >
+                                <table id="reasonTable" >
                                     <thead>
                                         <tr>
                                         <th>Reason</th>
@@ -453,8 +454,8 @@ require_once '../shared/check-login.php'; ?>
                                 echo "  
                                 <td>
                                 <div class='material-switch'>
-                                                <input id='someSwitchOptionPrimary{$data['reason_id']}'  class='onToggle task_type_status' name='someSwitchOption{$data['reason_id']}' type='checkbox' " . $checkBoxState . " />
-                                                <label for='someSwitchOptionPrimary{$data['reason_id']}' class='label-primary'></label>
+                                                <input id='someSwitchOptionPrimaryreason{$data['reason_id']}'  class='onToggle task_type_status' name='someSwitchOptionreason{$data['reason_id']}' type='checkbox' " . $checkBoxState . " />
+                                                <label for='someSwitchOptionPrimaryreason{$data['reason_id']}' class='label-primary'></label>
                                 </div>
                                 </td>
                                 <td>
@@ -519,6 +520,14 @@ require_once '../shared/check-login.php'; ?>
         });
 
         $('#taskTable').DataTable({
+            "paging": false
+        });
+
+        $('#reasonTable').DataTable({
+            "paging": false
+        });
+
+        $('#teamTable').DataTable({
             "paging": false
         });
 
