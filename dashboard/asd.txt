@@ -1,0 +1,125 @@
+Side Bar
+	- Only Show Allowed Links
+	- Only Access Allowed Pages
+	- Can perform only allowed Action.
+
+Insert into permission ( default values )
+
+User Login 
+	Data Sentization.
+	Query using PDO.
+
+
+Set Login 
+Set Roles And Permission
+
+- Where to Show Tasks for user. ( Dashboard is Only Visiable to Admin)
+
+
+- How to Upload
+- Task Deliverable
+
+
+- If Deliverable Assiging. tha First Show Project
+
+
+Commit All changs with (SQL)
+
+User can Have SIngle Team
+
+Fetch those task that are active
+
+
+
+
+
+
+
+deliver_members
+
+delierverable
+
+deliject_project
+
+
+deliverable_name
+deliverable_id
+
+userid
+projectid
+
+
+
+
+
+
+
+SELECT
+role_permission.permission_id,
+permissions.name,
+role_permission.permission_value
+FROM `user_role`
+JOIN `role_permission`
+  ON `user_role`.`role_id` = `role_permission`.`role_id` 
+JOIN `permissions`
+  ON `permissions`.`permission_id` = `role_permission`.`permission_id`
+AND `user_role`.`id` = 1.
+
+
+
+Update Via Edit Button and create name
+Validation must be same.
+
+
+
+single query data fetch projets
+	description
+	deliverable list
+	assine count
+	assigne lits
+	archive
+
+status
+	active/inactive
+
+
+because mam. view can be common for admin/users. 
+so for each view even for single edit button, 
+listing of any enity first we have to check privilege's of user/admin than show that particular view. 
+and privilege's can be updated also.
+and same goes for backend we have check at backend side also does user have privilage for any action.
+
+our template is ready, schema is ready. 
+
+
+
+
+SELECT 
+`project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
+(SELECT GROUP_CONCAT(`deliverable_name`) 
+ FROM `deliverables` as `dl` JOIN `project_deliverables` As `pd` 
+ ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
+ WHERE `pd`.`project_id` = `pj`.`project_id` 
+ GROUP BY `pd`.`project_id` )
+ as `deliverables`,
+ (SELECT count(*) FROM `project_members` AS `pm` WHERE `pm`.`project_id ` = `pj`.`project_id`) as `member_count`
+ FROM `projects` as `pj` GROUP By `pj`.`project_id`; 
+
+
+GROUP By `pj`.`project_id`
+
+
+
+SELECT * from `project_deliverables` as `pd`, `deliverables` as `dl`, `deliverable_members` as `pm` 
+WHERE `pd`.`project_id`=52 AND 
+`pd`.`deliverable_id` = `dl`.`deliverable_id` 
+AND `dl`.`deliverable_id` = `pm`.`deliverable_id`;
+
+
+SELECT `dl`.`deliverable_id`, `dl`.`deliverable_name` from `project_deliverables` as `pd`, `deliverables` as `dl`, `deliverable_members` as `pm` 
+WHERE `pd`.`project_id`=52 AND 
+`pd`.`deliverable_id` = `dl`.`deliverable_id` AND 
+`dl`.`deliverable_id` = `pm`.`deliverable_id`
+;
+
+
