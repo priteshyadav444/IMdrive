@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 14, 2023 at 07:09 PM
+-- Generation Time: Apr 19, 2023 at 07:04 PM
 -- Server version: 10.4.27-MariaDB-log
 -- PHP Version: 8.1.12
 
@@ -81,6 +81,18 @@ CREATE TABLE `deliverables` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `deliverables`
+--
+
+INSERT INTO `deliverables` (`deliverable_id`, `deliverable_name`, `created_by_admin_id`, `created_at`) VALUES
+(1, 'Customer Website', 1, '2023-04-17 12:12:13'),
+(2, 'Vendor  Web ', 1, '2023-04-17 12:12:34'),
+(3, 'Mobile App - Mobile', 1, '2023-04-18 04:40:45'),
+(4, 'Lending Page - Website', 1, '2023-04-18 04:41:47'),
+(12, 'Vendor - Mobile', 1, '2023-04-18 11:42:39'),
+(13, 'Customer Mobile', 1, '2023-04-19 11:08:13');
+
 -- --------------------------------------------------------
 
 --
@@ -93,6 +105,13 @@ CREATE TABLE `deliverable_members` (
   `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `deliverable_members`
+--
+
+INSERT INTO `deliverable_members` (`deliverable_id`, `user_id`, `project_file_assigned_type_id`, `created_at`) VALUES
+(3, 1, 1, '2023-04-19 12:05:56');
 
 -- --------------------------------------------------------
 
@@ -185,7 +204,22 @@ INSERT INTO `permissions` (`permission_id`, `name`, `created_on`) VALUES
 (64, 'update_master', '2023-04-14 16:02:50'),
 (65, 'create_task', '2023-04-14 16:07:03'),
 (66, 'update_task', '2023-04-14 16:07:03'),
-(67, 'view_task', '2023-04-14 16:07:14');
+(67, 'view_task', '2023-04-14 16:07:14'),
+(68, 'view_deliverable', '2023-04-17 11:14:57'),
+(69, 'create_deliverable', '2023-04-17 11:14:57'),
+(70, 'update_deliverable', '2023-04-17 11:14:57'),
+(71, 'view_team', '2023-04-17 11:14:57'),
+(72, 'create_team', '2023-04-17 11:14:57'),
+(73, 'update_team', '2023-04-17 11:14:57'),
+(74, 'view_ticket_reason', '2023-04-17 11:14:57'),
+(75, 'create_ticket_reason', '2023-04-17 11:14:57'),
+(76, 'update_ticket_reason', '2023-04-17 11:14:57'),
+(77, 'view_files', '2023-04-17 11:14:57'),
+(78, 'create_files', '2023-04-17 11:14:57'),
+(79, 'update_files', '2023-04-17 11:14:57'),
+(80, 'view_profile', '2023-04-17 11:14:57'),
+(81, 'create_profile', '2023-04-17 11:14:57'),
+(82, 'update_profile', '2023-04-17 11:14:57');
 
 -- --------------------------------------------------------
 
@@ -200,9 +234,19 @@ CREATE TABLE `projects` (
   `name` varchar(100) NOT NULL,
   `description` varchar(200) NOT NULL,
   `project_status_id` tinyint(3) UNSIGNED NOT NULL,
+  `is_archive` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `projects`
+--
+
+INSERT INTO `projects` (`project_id`, `created_by_admin_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`, `created_at`, `updated_at`) VALUES
+(52, 1, '/project-logo/cc90adf8-e9b5-4e42-b539-23beaaa9604a.png', 'Pritesh Yadav', 'asdads', 2, 0, '2023-04-19 07:11:15', '2023-04-19 07:11:15'),
+(53, 1, '/project-logo/3ef96e0a-f746-4a2d-a596-de82d5e4439c.png', 'Pritesh Yadav', 'asdads', 1, 0, '2023-04-19 08:10:06', '2023-04-19 08:10:06'),
+(54, 1, '/project-logo/2f7b46f8-594e-48d2-ba3e-fbc06590758d.jpg', 'Pritesh Yadav', 'asdas', 1, 0, '2023-04-19 09:28:12', '2023-04-19 09:28:12');
 
 -- --------------------------------------------------------
 
@@ -215,6 +259,17 @@ CREATE TABLE `project_deliverables` (
   `deliverable_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `project_deliverables`
+--
+
+INSERT INTO `project_deliverables` (`project_id`, `deliverable_id`) VALUES
+(52, 3),
+(53, 3),
+(54, 2),
+(54, 3),
+(54, 4);
+
 -- --------------------------------------------------------
 
 --
@@ -225,6 +280,13 @@ CREATE TABLE `project_file_assigned_types` (
   `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
   `name` varchar(20) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `project_file_assigned_types`
+--
+
+INSERT INTO `project_file_assigned_types` (`project_file_assigned_type_id`, `name`) VALUES
+(1, 'filename');
 
 -- --------------------------------------------------------
 
@@ -260,6 +322,14 @@ CREATE TABLE `project_status` (
   `project_status_id` tinyint(3) UNSIGNED NOT NULL,
   `project_status_type_name` varchar(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `project_status`
+--
+
+INSERT INTO `project_status` (`project_status_id`, `project_status_type_name`) VALUES
+(1, 'actice'),
+(2, 'inactice');
 
 -- --------------------------------------------------------
 
@@ -322,7 +392,46 @@ INSERT INTO `role_permission` (`role_id`, `permission_id`, `permission_value`) V
 (1, 62, 1),
 (1, 63, 1),
 (1, 64, 1),
-(1, 65, 1);
+(1, 65, 1),
+(1, 66, 1),
+(1, 67, 1),
+(1, 68, 1),
+(1, 69, 1),
+(1, 70, 1),
+(1, 71, 1),
+(1, 72, 1),
+(1, 73, 1),
+(1, 74, 1),
+(1, 75, 1),
+(1, 76, 1),
+(1, 77, 1),
+(1, 78, 1),
+(1, 79, 1),
+(1, 80, 1),
+(1, 81, 1),
+(1, 82, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `task_types`
+--
+
+CREATE TABLE `task_types` (
+  `task_type_id` smallint(5) UNSIGNED NOT NULL,
+  `task_type_name` varchar(30) NOT NULL,
+  `created_by_user_id` int(10) UNSIGNED NOT NULL,
+  `task_type_status` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `task_types`
+--
+
+INSERT INTO `task_types` (`task_type_id`, `task_type_name`, `created_by_user_id`, `task_type_status`) VALUES
+(1, 'test1', 1, 0),
+(2, 'Unable to Upload Image', 1, 1),
+(3, 'Backend - Task', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -336,6 +445,17 @@ CREATE TABLE `teams` (
   `team_name` varchar(100) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `teams`
+--
+
+INSERT INTO `teams` (`team_id`, `created_by_admin_id`, `team_name`, `created_at`) VALUES
+(4, 1, 'asd 2', '2023-04-18 05:27:41'),
+(5, 1, 'Flutter', '2023-04-18 05:35:02'),
+(6, 1, 'FrontEnd 2', '2023-04-18 11:26:47'),
+(7, 1, 'Ui/Ux', '2023-04-18 11:28:09'),
+(8, 1, 'PHP', '2023-04-18 11:28:09');
 
 -- --------------------------------------------------------
 
@@ -371,8 +491,18 @@ CREATE TABLE `tickets` (
 CREATE TABLE `ticket_reasons` (
   `reason_id` tinyint(3) UNSIGNED NOT NULL,
   `content` varchar(60) NOT NULL,
-  `created_by_user_id` int(10) UNSIGNED NOT NULL
+  `created_by_user_id` int(10) UNSIGNED NOT NULL,
+  `reason_status` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ticket_reasons`
+--
+
+INSERT INTO `ticket_reasons` (`reason_id`, `content`, `created_by_user_id`, `reason_status`) VALUES
+(1, 'Unable To Upload', 1, 0),
+(2, 'Check Test', 1, 1),
+(3, 'asd', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -566,6 +696,13 @@ ALTER TABLE `role_permission`
   ADD KEY `permission_id` (`permission_id`);
 
 --
+-- Indexes for table `task_types`
+--
+ALTER TABLE `task_types`
+  ADD PRIMARY KEY (`task_type_id`),
+  ADD KEY `created_by_user_id` (`created_by_user_id`);
+
+--
 -- Indexes for table `teams`
 --
 ALTER TABLE `teams`
@@ -649,7 +786,7 @@ ALTER TABLE `allowed_emails`
 -- AUTO_INCREMENT for table `deliverables`
 --
 ALTER TABLE `deliverables`
-  MODIFY `deliverable_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `deliverable_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `files`
@@ -667,19 +804,19 @@ ALTER TABLE `folders`
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `permission_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `permission_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `project_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `project_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `project_file_assigned_types`
 --
 ALTER TABLE `project_file_assigned_types`
-  MODIFY `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `project_status`
@@ -694,10 +831,16 @@ ALTER TABLE `roles`
   MODIFY `role_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `task_types`
+--
+ALTER TABLE `task_types`
+  MODIFY `task_type_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `teams`
 --
 ALTER TABLE `teams`
-  MODIFY `team_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `team_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `tickets`
@@ -709,7 +852,7 @@ ALTER TABLE `tickets`
 -- AUTO_INCREMENT for table `ticket_reasons`
 --
 ALTER TABLE `ticket_reasons`
-  MODIFY `reason_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `reason_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `ticket_status`
@@ -809,6 +952,12 @@ ALTER TABLE `project_member_files`
 ALTER TABLE `role_permission`
   ADD CONSTRAINT `role_permission_ibfk_1` FOREIGN KEY (`role_id`) REFERENCES `roles` (`role_id`),
   ADD CONSTRAINT `role_permission_ibfk_2` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`permission_id`);
+
+--
+-- Constraints for table `task_types`
+--
+ALTER TABLE `task_types`
+  ADD CONSTRAINT `task_types_ibfk_1` FOREIGN KEY (`created_by_user_id`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `teams`
