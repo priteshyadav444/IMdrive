@@ -22,6 +22,53 @@ require_once '../shared/check-login.php';
 </head>
 
 <body>
+    <?php
+    $connection = new Connection();
+    $user = new User($connection->getConnection());
+
+    $hasPermissionToViewDeliverable = false;
+    $hasPermissionToCreateDeliverable = false;
+    $hasPermissionToUpdateDeliverable = false;
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_DELIVERABLE]) {
+        $hasPermissionToViewDeliverable = true;
+    }
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_DELIVERABLE]) {
+        $hasPermissionToCreateDeliverable = true;
+    }
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) {
+        $hasPermissionToUpdateDeliverable = true;
+    }
+    $projectId = $_GET['id'];
+    if (isset($_GET['id'])) {
+        $result = $user->getAllDelverableListPage($projectId);
+        $row = "";
+        foreach ($result as $data) {
+            $data['is_edit_visible'] = '';
+            if (!$hasPermissionToUpdateDeliverable) {
+                $data['is_edit_visible'] = 'none';
+            }
+
+
+            $row = $row . '<div class="list-group">
+            <a href="files.php?id=' . $data['deliverable_id'] . '">
+                <span class="glyphicon glyphicon-folder-close" class="list-group-item"></span> ' . $data['deliverable_name'] . '
+            </a>
+
+            <span class="pull-right mr-5" class="list-group-item"  style="display:' . $data['is_edit_visible'] . ';">
+                <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i> Assign</button>
+            </span>
+            <span class="pull-right" class="list-group-item">
+                <button class="btn btn-link btn-xs" data-toggle="modal" data-target="#assigneesModal">
+                ' . $data['member_count'] . ' Assignees 
+                </button>
+            </span>
+        </div>';
+        }
+    }
+    ?>
     <!--[if lt IE 8]>
 		<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
@@ -77,42 +124,7 @@ require_once '../shared/check-login.php';
                                     <div class="panel-heading">Deliverables</div>
                                     <div class="panel-body">
 
-                                        <div class="list-group">
-                                            <a href="files.php">
-                                                <span class="glyphicon glyphicon-folder-close" class="list-group-item"></span> Deliverable 1
-                                            </a>
-                                            <span class="pull-right mr-5" class="list-group-item">
-                                                <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i> Assign</button>
-                                            </span>
-
-                                            <span class="pull-right" class="list-group-item">
-                                                <button class="btn btn-link btn-xs" data-toggle="modal" data-target="#assigneesModal">
-                                                    2 Assignees
-                                                </button>
-                                            </span>
-
-
-                                            <td>
-
-                                            </td>
-
-
-                                        </div>
-
-                                        <div class="list-group">
-                                            <a href="files.php">
-                                                <span class="glyphicon glyphicon-folder-close" class="list-group-item"></span> Deliverable 2
-                                            </a>
-
-                                            <span class="pull-right mr-5" class="list-group-item">
-                                                <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i> Assign</button>
-                                            </span>
-                                            <span class="pull-right" class="list-group-item">
-                                                <button class="btn btn-link btn-xs" data-toggle="modal" data-target="#assigneesModal">
-                                                    2 Assignees
-                                                </button>
-                                            </span>
-                                        </div>
+                                        <?php echo $row; ?>
                                     </div>
                                 </div>
 
