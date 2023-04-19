@@ -29,7 +29,7 @@ User can Have SIngle Team
 
 Fetch those task that are active
 
-
+add extra table for deliver_members_files table below added
 
 
 
@@ -122,4 +122,87 @@ WHERE `pd`.`project_id`=52 AND
 `dl`.`deliverable_id` = `pm`.`deliverable_id`
 ;
 
+
+Update Description as alha numeric . 
+Insert one extra attribut in images image type main,varient
+
+
+
+
+
+
+// deliverable releted tables
+
+CREATE TABLE `deliverables` (
+  `deliverable_id` int(10) UNSIGNED NOT NULL,
+  `deliverable_name` varchar(60) NOT NULL,
+  `created_by_admin_id` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+ 
+CREATE TABLE `deliverable_members` (
+  `deliverable_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `deliverable_members`
+  ADD KEY `deliverable_id` (`deliverable_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `project_file_assigned_type_id` (`project_file_assigned_type_id`);
+
+ALTER TABLE `deliverable_members`
+  ADD CONSTRAINT `deliverable_members_ibfk_1` FOREIGN KEY (`deliverable_id`) REFERENCES `deliverables` (`deliverable_id`),
+  ADD CONSTRAINT `deliverable_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `deliverable_members_ibfk_3` FOREIGN KEY (`project_file_assigned_type_id`) REFERENCES `project_file_assigned_types` (`project_file_assigned_type_id`);
+
+
+CREATE TABLE `project_file_assigned_types` (
+  `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
+  `name` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+`project_file_assigned_type_id` 
+CONATON TWO TYPES 
+
+	1) ALL
+	2) CUSTOM
+
+
+ALTER TABLE `project_file_assigned_types`
+  ADD PRIMARY KEY (`project_file_assigned_type_id`);
+
+CREATE TABLE `files` (
+  `file_id` int(10) UNSIGNED NOT NULL,
+  `deliverable_id` int(10) UNSIGNED NOT NULL,
+  `uploaded_by_user_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `image_varients` (
+  `file_id` int(10) UNSIGNED NOT NULL,
+  `image_url` varchar(100) NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `size` varchar(30) NOT NULL,
+  `width` varchar(20) NOT NULL,
+  `height` varchar(20) NOT NULL,
+  `thumbnail_url` varchar(100) NOT NULL,
+  `folder_id` int(10) UNSIGNED NOT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `image_varients`
+  ADD KEY `file_id` (`file_id`),
+  ADD KEY `folder_id` (`folder_id`);
+
+
+CREATE TABLE `deliverable_member_files` (
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `file_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `deliverable_member_files`
+  ADD CONSTRAINT `project_member_files_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `project_member_files_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`file_id`);
 

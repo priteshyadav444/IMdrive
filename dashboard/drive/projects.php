@@ -64,7 +64,7 @@ require_once '../shared/check-login.php';
             $data['project_status_html'] = '<button class="pd-setting">Active</button>';
             $data['status_checked'] = "checked";
         } else {
-            $data['project_status_html'] = '<button class="ds-setting">InActice</button>';
+            $data['project_status_html'] = '<button class="ds-setting">In Active</button>';
             $data['status_checked'] = "";
         }
 
@@ -75,7 +75,7 @@ require_once '../shared/check-login.php';
             $data['is_archive_checked'] = "";
         }
 
-        $row = $row . '<tr>
+        $row = $row . '<tr id=' . $data["project_id"] . '>
         <td>' . $data["project_id"] . '</td>
         <td width="250px" height="150px"><img src=..' . $data["logo_url"] . ' alt=' . $data["name"] . '  ></td>
         <td>
@@ -87,7 +87,7 @@ require_once '../shared/check-login.php';
         </td>
         <td> ' . $data["description"] . '<button class="btn btn-link"><i class="glyphicon glyphicon-info-sign"></i></button></td>
         <td> ' . $data["deliverables"] . ' </td>
-        <td>
+        <td id="StatusText">
             ' .  $data['project_status_html'] . '
         </td>
         <td style="display:' . $data['is_edit_visible'] . ';">
@@ -98,7 +98,7 @@ require_once '../shared/check-login.php';
         </td>
         <td style="display:' . $data['is_edit_visible'] . ';">
             <div class="material-switch">
-                <input type="checkbox" id="archive' . $data["project_id"] . '" name="archive' . $data["project_id"] . '"   ' . $data['is_archive_checked'] . '/>
+                <input type="checkbox"  id="archive' . $data["project_id"] . '" name="archive' . $data["project_id"] . '"   ' . $data['is_archive_checked'] . '/>
                 <label for="archive' . $data["project_id"] . '" class="label-primary"></label>
             </div>
         </td>
@@ -178,7 +178,7 @@ require_once '../shared/check-login.php';
                             </div>
                             <hr>
                             <div class="asset-inner">
-                                
+
                                 <table class="table">
                                     <thead>
                                         <tr>
@@ -235,6 +235,81 @@ require_once '../shared/check-login.php';
 
     <?php include_once '../shared/footer.php'; ?>
     <?php include_once '../shared/footer-link.php'; ?>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('input[type="checkbox"][name^="archive"]').on("change", function() {
+                var newStatus = $(this).val();
+                var projectId = $(this).closest("tr").attr('id');
+                var checkbox = $(this);
+                $.ajax({
+                    url: "update_project.php",
+                    method: "POST",
+                    data: {
+                        projectId: projectId,
+                        newStatus: newStatus
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        console.log(projectId);
+                        if (response.status == "success") {
+                            // Remove the row from the table
+                            checkbox.closest('tr').hide();
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log(textStatus, errorThrown);
+                    }
+                });
+            });
+
+
+            $('input[type="checkbox"][name^="status"]').on("change", function() {
+                var projectId = $(this).closest("tr").attr('id');
+                var newStatus = $(this).is(":checked");
+
+                $.ajax({
+                    url: "update_project.php",
+                    method: "POST",
+                    data: {
+                        projectId: projectId,
+                        newActiveStatus: newStatus
+                    },
+                    dataType: "json",
+                    success: function(response) {
+
+                        $('button.pd-setting').removeClass('pd-setting').addClass('sd-setting').text('In Active');
+
+                        // var row = $('#' + projectId);
+                        // if (response.statusId == 1) {
+                        //     row.find('#StatusText').text('Active');
+                        // } else {
+                        //     row.find('#StatusText').text('In Active');
+                        // }
+                        
+                        // // Update the checkbox state
+                        // row.find('input[type="checkbox"][name^="status"]').prop('checked', newStatus);
+                        // // Update the button class
+                        // row.find('.pd-setting').removeClass('pd-setting').addClass('ds-setting');
+
+
+
+                        var row = $('#' + projectId);
+                        if (response.statusId == 1) {
+                            row.find('#StatusText').html('<button class="pd-setting">Active</button>');
+                        } else {
+                            row.find('#StatusText').html('<button class="ds-setting">In Active</button>');
+                        }
+
+
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log(textStatus, errorThrown);
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
 

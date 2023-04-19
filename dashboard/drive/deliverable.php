@@ -1,6 +1,11 @@
 <?php
 @session_start();
 require_once '../shared/check-login.php';
+$projectId = $_GET['id'];
+    if(!$projectId){
+        $URL = "projects.php";
+        header('Location: ' . $URL);
+    }
 ?>
 
 <!doctype html>
@@ -41,7 +46,7 @@ require_once '../shared/check-login.php';
     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_DELIVERABLE]) {
         $hasPermissionToUpdateDeliverable = true;
     }
-    $projectId = $_GET['id'];
+    
     if (isset($_GET['id'])) {
         $result = $user->getAllDelverableListPage($projectId);
         $row = "";
