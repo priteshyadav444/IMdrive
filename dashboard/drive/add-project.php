@@ -46,7 +46,7 @@ require_once '../shared/check-login.php';
     // Generate select options
     $connection = new Connection();
     $user = new User($connection->getConnection());
-    $options = " <option value='null'>Select Deliverable Type</option>";
+    $options = " <option value='null' disabled >Select Deliverable</option>";
 
     $deliverables = $user->getAllDelverable();
     foreach ($deliverables as $deliverable) {
@@ -57,26 +57,43 @@ require_once '../shared/check-login.php';
 
       $extention = pathinfo($_FILES["logo"]['name'], PATHINFO_EXTENSION);
 
-      in_array($extention, array("jpg", "png", "jpeg", "svg"));
-      
+
+      // custom validation for files
+      $isValidFilefomat = in_array($extention, array("jpg", "png", "jpeg", "svg"));
+      if (!$isValidFilefomat) {
+        $obj->setError("Uploaded File should be jpg, png, svg, jpeg.", "custom");
+      }
+
+      // custom validation for deliverables
+      $isValidDeliverable = true;
+      if (!is_array($_POST['deliverable']) || count($_POST['deliverable']) < 0) {
+        $obj->setError("Delieverable Required", "custom");
+        $isValidDeliverable = false;
+      }
+
+
       $validations = [
         'name' => 'required|string',
-        'deliverable' => 'required',
         'description' => 'required|string',
         'logo' => "required|filetype:{$extention}|max:40000",
       ];
 
-
-      $file = new FileValidator($_FILES, "logo", "files");
-      $file->upload();
+      $path = "../project-logo";
+      $file = new FileValidator($_FILES, "logo",  $path);
 
       // if all validation Passed
-      if (!$obj->validate($_POST, $validations)->isError()) {
+      if (!$obj->validate($_POST, $validations)->isError() && $isValidFilefomat) {
+
+        $img_url = $file->upload();
+        $projectDetails['name'] = $obj->senitizeInput($_POST['name']);
+        $projectDetails['deliverable_id'] = $_POST['deliverable'];
+        $projectDetails['description'] = $obj->senitizeInput($_POST['description']);
+        $projectDetails['img_url'] = ltrim($img_url, '.');
 
         $connection = new Connection();
         $user = new User($connection->getConnection());
 
-        // $isFormDataValid = $user->createProject($obj->senitizeInput($_POST['name']));
+        $isFormDataValid = $user->createProject($projectDetails);
       }
     }
 
@@ -115,22 +132,22 @@ require_once '../shared/check-login.php';
                               <div class="form-group">
                                 <input name="name" type="text" class="form-control" placeholder="Enter Project Name">
                               </div>
+
                               <div class="form-group">
-                                <input name="logo" type="file" class="form-control" accept="image/png, image/svg, image/jpeg, image/jpg" placeholder="Select Project Logo ">
+                                <textarea name="description" type="textarea" class="form-control" placeholder="Enter Project Description" rows="2"></textarea>
                               </div>
 
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                               <div class="form-group">
                                 <div class="form-select-list">
-                                  <select class="form-control custom-select-value" name="deliverable">
+                                  <select class="form-control custom-select-value" name="deliverable[]" multiple size='6.5'>
                                     <?php echo $options; ?>
                                   </select>
                                 </div>
                               </div>
-
                               <div class="form-group">
-                                <input name="description" type="text" class="form-control" placeholder="Enter Project Description">
+                                <input name="logo" type="file" class="form-control" accept="image/png, image/svg, image/jpeg, image/jpg" placeholder="Select Project Logo ">
                               </div>
                             </div>
                           </div>
