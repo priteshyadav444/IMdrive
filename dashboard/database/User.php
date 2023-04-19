@@ -79,7 +79,6 @@ class User
             }
             return $privilages;
         } catch (PDOException $e) {
-
             die($e->getMessage());
         }
     }
@@ -209,6 +208,36 @@ class User
             try {
                 $sqlQuery = "SELECT `deliverable_id`, `deliverable_name` FROM `deliverables` order by `created_at`";
                 $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->execute();
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
+
+    public function getAllDelverableListPage($projectId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_DELIVERABLE) != false) {
+            try {
+
+                $sqlQuery = "SELECT `dl`.`deliverable_id`, `dl`.`deliverable_name`,
+                (SELECT COUNT(*) FROM 
+                 `deliverable_members` AS `dm` 
+                WHERE `dm`.`deliverable_id` = `dl`.`deliverable_id`) AS `member_count`
+                from `project_deliverables` as `pd`, `deliverables` as `dl`
+                WHERE `pd`.`project_id`= ? AND 
+                `pd`.`deliverable_id` = `dl`.`deliverable_id`";
+                $stmt = $this->connection->prepare($sqlQuery);
+                $stmt->bindValue(1, $projectId);
 
                 $stmt->execute();
                 $result = array();
@@ -353,30 +382,99 @@ class User
         return false;
     }
 
+    public function updateTicketReason($reasonContent, $reasonId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_TICKET_REASON) != false) {
+            try {
+                $sqlQuery = "UPDATE `ticket_reasons` SET `content`=? WHERE `reason_id` = ?";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->bindValue(1, $reasonContent);
+                $stmt->bindValue(2, $reasonId);
+
+                if ($stmt->execute()) {
+                    return $reasonContent;
+                }
+                return false;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
 
     public function createProject($projectDetails)
     {
         $userId = $this->sessionManagment->getUserId();
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_PROJECT) != false) {
             try {
+
+                $createdByAdminId = $userId;
+                $projectName = $projectDetails['name'];
+                $description = $projectDetails['description'];
+                $logoUrl = $projectDetails['img_url'];
+                $projectStatus = 1; //active
+                $deliverables = $projectDetails['deliverable_id']; // deliverable array
+
                 $sqlQuery = "INSERT INTO `projects` (`created_by_admin_id`, `logo_url`, `name`, `description`, `project_status_id`) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $this->connection->prepare($sqlQuery);
 
 
-                $createdByAdminId = $userId;
-                $logoUrl = $projectDetails['logo_url'];
-                $name = $projectDetails['name'];
-                $description = $projectDetails['description'];
-                $projectStatusId = $projectDetails['project_status_id'];
 
-                $stmt->bind_param("isssi", $createdByAdminId, $logoUrl, $name, $description, $projectStatusId);
 
-                if ($stmt->execute()) {
-                    return true;
-                    $stmt->close();
+                $stmt->bindValue(1, $createdByAdminId);
+                $stmt->bindValue(2, $logoUrl);
+                $stmt->bindValue(3, $projectName);
+                $stmt->bindValue(4, $description);
+                $stmt->bindValue(5, $projectStatus);
+
+                $this->connection->beginTransaction();
+                // inserting projects
+                $stmt->execute();
+                $deliverableLength = count($deliverables);
+                if (is_array($deliverables) &&  $deliverableLength > 0) {
+                    $projectId = $this->connection->lastInsertId();
+
+
+                    $sqlQuery = "INSERT INTO `project_deliverables`(`project_id`, `deliverable_id`) VALUES ";
+                    $values = "";
+
+                    for ($i = 1; $i <=  $deliverableLength; $i++) {
+                        $values = $values . "(?,?)";
+                        if ($i != $deliverableLength)
+                            $values = $values . ",";
+                    }
+
+                    $sqlQuery = $sqlQuery . $values;
+
+                    var_dump($sqlQuery);
+                    // preparing query for deliverable
+                    $stmt = $this->connection->prepare($sqlQuery);
+
+                    // setting project.
+                    for ($i = 0; $i < $deliverableLength; $i++) {
+                        $idx = $i * 2 + 1;
+                        $stmt->bindValue($idx, $projectId);
+                        $stmt->bindValue($idx + 1, $deliverables[$i]);
+                    }
+
+
+
+                    // // inserting deliverables and commiting changes
+                    if ($stmt->execute()) {
+                        $this->connection->commit();
+                        return true;
+                    }
                 }
+
                 return false;
             } catch (PDOException $e) {
+                if ($this->connection->inTransaction()) {
+                    $this->connection->rollback();
+                    // If we got here our two data updates are not in the database
+                }
                 die($e->getMessage());
             }
         }
@@ -388,7 +486,17 @@ class User
         $userId = $this->sessionManagment->getUserId();
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_PROJECT) != false) {
             try {
-                $sqlQuery = "";
+                $sqlQuery = "SELECT 
+                `project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
+                (SELECT GROUP_CONCAT(`deliverable_name`) 
+                 FROM `deliverables` as `dl` JOIN `project_deliverables` As `pd` 
+                 ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
+                 WHERE `pd`.`project_id` = `pj`.`project_id` 
+                 GROUP BY `pd`.`project_id` )
+                 as `deliverables`,
+                (SELECT count(*) FROM `project_members` as `pm` WHERE `pm`.`project_id` = `pj`.`project_id`) as `member_count` 
+                 FROM `projects` as `pj` WHERE `pj`.`is_archive` = 0 GROUP By `pj`.`project_id`; ";
+
                 $stmt = $this->connection->prepare($sqlQuery);
                 $stmt->execute();
 
