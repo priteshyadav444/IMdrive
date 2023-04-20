@@ -19,6 +19,54 @@ require_once '../shared/check-login.php';
   require_once "../database/User.php";
   ?>
 </head>
+<?php
+
+
+$hasPermissionToViewUser = false;
+$hasPermissionToCreateUser = false;
+$hasPermissionToUpdateUser = false;
+
+if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_USER]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_USER]) {
+  $hasPermissionToViewUser = true;
+}
+
+if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_USER]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_USER]) {
+  $hasPermissionToCreateUser = true;
+}
+
+if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_USER]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_USER]) {
+  $hasPermissionToUpdateUser = true;
+}
+
+if (!$hasPermissionToViewUser) {
+  $connection = new Connection();
+  $user = new User($connection->getConnection());
+  // $result = $user->getAllUser();
+
+  $row = "";
+
+  foreach ($result as $data) {
+    $row = $row . '
+
+        ';
+
+    if ($hasPermissionToUpdateUser) {
+      $row = $row . ' 
+            <td>
+             <button class="btn btn-link" data-toggle="modal" data-target="#assigneesModal" id=' . $data['role_id'] . '>
+                View All
+             </button>
+            </td>
+            <td>
+              <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+            </td>
+          <td><button class="btn btn-primary" data-toggle="modal" data-target="#assignModal" id=' . $data['role_id'] . '><i class="glyphicon glyphicon-plus"></i></button></td> </tr>';
+    } else {
+      $row = $row . '</tr>';
+    }
+  }
+}
+?>
 
 <body>
   <!--[if lt IE 8]>
@@ -67,7 +115,11 @@ require_once '../shared/check-login.php';
               <div class="product-status-wrap drp-lst">
                 <h4>User List</h4>
                 <div class="add-product">
-                  <a href="add-user.php">Add User</a>
+                  <?php
+                  if ($hasPermissionToViewUser) {
+                    echo '<a href="add-user.php">Add User</a>';
+                  }
+                  ?>
                 </div>
                 <div class="asset-inner">
                   <table>
