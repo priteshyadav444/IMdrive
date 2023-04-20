@@ -247,10 +247,8 @@ CREATE TABLE `project_deliverables` (
 -- Table structure for table `project_file_assigned_types`
 --
 
-CREATE TABLE `project_file_assigned_types` (
-  `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
-  `name` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 
 -- --------------------------------------------------------
 
@@ -967,3 +965,7 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+INSERT INTO `project_file_assigned_types` (`project_file_assigned_type_id`, `name`) VALUES ('1', 'all'), ('2', 'custom');
+set null value to uploaded by in
