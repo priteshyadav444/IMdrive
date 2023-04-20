@@ -514,7 +514,7 @@ class User
 
 
 
-    public function updateProjectArchive($projectId, $status = true)
+    public function updateProjectArchive($projectId, $status)
     {
         $userId = $this->sessionManagment->getUserId();
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_PROJECT) != false) {
@@ -522,9 +522,8 @@ class User
                 $sqlQuery = "UPDATE `projects` SET `is_archive` = ? WHERE `project_id` = ?";
                 $stmt = $this->connection->prepare($sqlQuery);
 
-                $stmt->bindValue(1, $projectId);
-                $stmt->bindValue(2, $status);
-
+                $stmt->bindValue(1, $status);
+                $stmt->bindValue(2, $projectId);
                 if ($stmt->execute()) {
                     return true;
                 }
@@ -569,182 +568,255 @@ class User
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row)
+            return false;
         return $row['project_file_assigned_type_id'];
     }
 
-    public function getFileDetails($deliverableId, $userId)
+
+    public function getMainFileDetails($deliverableId)
     {
-        $projectFileAssignedTypeId = $this->getProjectFileAssignedTypeId($deliverableId, $userId);
 
-        // If assigned type is ALL
-        if ($projectFileAssignedTypeId == 1) {
-            $sqlQuery = "SELECT iv.*
-                FROM deliverable_members dm
-                JOIN files f ON f.deliverable_id = dm.deliverable_id
-                JOIN image_varients iv ON iv.file_id = f.file_id
-                WHERE dm.deliverable_id = :deliverable_id
-                AND dm.project_file_assigned_type_id = :project_file_assigned_type_id
-                AND dm.user_id = :user_id";
+        $userId = $this->sessionManagment->getUserId();
+        $userRole = $this->getUserRole($userId);
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_FILES) != false) {
 
-            $stmt = $this->connection->prepare($sqlQuery);
-            $stmt->bindParam(':deliverable_id', $deliverableId, PDO::PARAM_INT);
-            $stmt->bindValue(':project_file_assigned_type_id', $projectFileAssignedTypeId, PDO::PARAM_INT);
-            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        } else if ($projectFileAssignedTypeId == 2) {
-            // If assigned type is CUSTOM
-            $sqlQuery = "SELECT iv.*
-                FROM deliverable_member_files dmf
-                JOIN files f ON f.file_id = dmf.file_id
-                JOIN image_varients iv ON iv.file_id = f.file_id
-                WHERE f.deliverable_id = :deliverable_id
-                AND dmf.user_id = :user_id";
+            $projectFileAssignedTypeId = $this->getProjectFileAssignedTypeId($deliverableId, $userId);
+            if ($projectFileAssignedTypeId == false &&  $userRole != 1) {
+                return false;
+            }
 
-            $stmt = $this->connection->prepare($sqlQuery);
-            $stmt->bindParam(':deliverable_id', $deliverableId, PDO::PARAM_INT);
-            $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
-        } else {
-            // admin 
-            $sqlQuery = "SELECT f.*, iv.filename
+            if ($userRole == 1) {
+                // listing for admin  
+                $sqlQuery = "SELECT  
+                 iv.*,  
+                 (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` ) `no_of_varient`
+                 FROM files f
+                 LEFT JOIN image_varients iv ON f.file_id = iv.file_id
+                 WHERE f.deliverable_id = :deliverable_id
+                 AND `f`.`file_type` = :file_type";
+
+                $stmt = $this->connection->prepare($sqlQuery);
+                $stmt->bindParam(':deliverable_id', $deliverableId, PDO::PARAM_INT);
+                $fileTypeId = 1; // image type main for listing
+                $stmt->bindParam(':file_type', $fileTypeId, PDO::PARAM_INT);
+            } else if ($projectFileAssignedTypeId == 1) {
+                // If assigned type is ALL (1)
+                $sqlQuery = "SELECT 
+            iv.*,  (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` ) `no_of_varient`
+            FROM `deliverable_members` `dm`
+            JOIN `files` `f` ON f.deliverable_id = dm.deliverable_id
+            JOIN `image_varients` `iv` ON iv.file_id = f.file_id
+            WHERE dm.deliverable_id = :deliverable_id
+            AND dm.project_file_assigned_type_id = :project_file_assigned_type_id
+            AND dm.user_id = :user_id
+            AND `f`.`file_type` = :file_type";
+
+                $stmt = $this->connection->prepare($sqlQuery);
+                $stmt->bindParam(':deliverable_id', $deliverableId, PDO::PARAM_INT);
+                $stmt->bindParam(':project_file_assigned_type_id', $projectFileAssignedTypeId, PDO::PARAM_INT);
+                $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+                $fileTypeId = 1; // image type main for listing
+                $stmt->bindParam(':file_type', $fileTypeId, PDO::PARAM_INT);
+            } else if ($projectFileAssignedTypeId == 2) {
+                // If assigned type is CUSTOM (2)
+                $sqlQuery = "SELECT iv.*
+            FROM deliverable_member_files dmf
+            (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` ) `no_of_varient`
+            JOIN files f ON f.file_id = dmf.file_id
+            JOIN image_varients iv ON iv.file_id = f.file_id
+            WHERE f.deliverable_id = 3
+            AND dmf.user_id = 1
+            AND f.file_type = :file_type;";
+
+                $stmt = $this->connection->prepare($sqlQuery);
+                $stmt->bindParam(':deliverable_id', $deliverableId, PDO::PARAM_INT);
+                $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+                $stmt->bindParam(':file_type', 1, PDO::PARAM_INT); // image type main for listing
+
+            } else {
+                // admin 
+                $sqlQuery = "SELECT  
+            iv.*,  
+            (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` ) `no_of_varient`
             FROM files f
             LEFT JOIN image_varients iv ON f.file_id = iv.file_id
             WHERE f.deliverable_id = ?";
-            try {
-                $stmt = $this->connection->prepare($sqlQuery);
-                $stmt->bindValue("1", $deliverableId);
-                $stmt->execute();
+                try {
+                    $stmt = $this->connection->prepare($sqlQuery);
+                    $stmt->bindValue("1", $deliverableId);
+                    $stmt->execute();
 
-                $result = array();
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    array_push($result, $row);
+                    $result = array();
+                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        array_push($result, $row);
+                    }
+                    return $result;
+                } catch (PDOException $e) {
+                    die($e->getMessage());
                 }
-                return $result;
-            } catch (PDOException $e) {
-                die($e->getMessage());
+                // Invalid project_file_assigned_type_id
             }
-            return false; // Invalid project_file_assigned_type_id
-        }
 
-        $stmt->execute();
-        $result = array();
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            array_push($result, $row);
+            $stmt->execute();
+            $result = array();
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                array_push($result, $row);
+            }
+            return $result;
         }
-        return $result;
+        return false;
     }
-    public function insertImageDetails($deliverableId, $userId, $fileName, $fileType, $fileSize, $filePath, $thumbPath, $isPublic)
+
+    private function isMemberOfDeliverable($deliverableId)
     {
-        // Check if the user has access to the deliverable
-        // add transaction
-        $stmt = $this->connection->prepare("SELECT COUNT(*) FROM deliverable_members WHERE deliverable_id = ? AND user_id = ?");
-        $stmt->bindValue(1, $deliverableId);
-        $stmt->bindValue(2, $userId);
-        $stmt->execute();
-        $count = $stmt->fetchColumn();
-        if ($count == 0) {
-            return false;
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_PROJECT) != false) {
+            $stmt = $this->connection->prepare("SELECT COUNT(*) FROM deliverable_members WHERE deliverable_id = ? AND user_id = ?");
+            $stmt->bindValue(1, $deliverableId);
+            $stmt->bindValue(2, $userId);
+            $stmt->execute();
+            $count = $stmt->fetchColumn();
+            if ($count == 0) {
+                return false;
+            }
         }
-
-
-        // Insert file details
-        $stmt = $this->connection->prepare("INSERT INTO files (name, type, size, path, thumb_path, is_public) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bindValue(1, $fileName);
-        $stmt->bindValue(2, $fileType);
-        $stmt->bindValue(3, $fileSize);
-        $stmt->bindValue(4, $filePath);
-        $stmt->bindValue(5, $thumbPath);
-        $stmt->bindValue(6, $isPublic);
-        $stmt->execute();
-        $fileId = $this->connection->lastInsertId();
-
-        // Insert image variant details
-        $stmt = $this->connection->prepare("INSERT INTO image_variants (file_id) VALUES (?)");
-        $stmt->bindValue(1, $fileId);
-        $stmt->execute();
-
-        // Insert deliverable member file association
-        $stmt = $this->connection->prepare("INSERT INTO deliverable_member_files (user_id, file_id) VALUES (?, ?)");
-        $stmt->bindValue(1, $userId);
-        $stmt->bindValue(2, $fileId);
-        $stmt->execute();
-
         return true;
     }
-    function createRoleWithPermissions($permissions) {
-        $pdo = new PDO("mysql:host=localhost;dbname=mydatabase", "username", "password");
-      
-        // Start transaction
-        $pdo->beginTransaction();
-      
-        try {
-          // Create role
-          $stmt = $pdo->prepare("INSERT INTO role (name) VALUES (:name)");
-          $stmt->bindValue(':name', 'new_role');
-          $stmt->execute();
-          $role_id = $pdo->lastInsertId();
-      
-          // Assign permissions to role
-          $stmt = $pdo->prepare("INSERT INTO role_permission (role_id, permission_id, permission_value) SELECT :role_id, id, :permission_value FROM permission WHERE name = :name");
-          foreach ($permissions as $name => $value) {
-            $stmt->bindValue(':role_id', $role_id);
-            $stmt->bindValue(':name', $name);
-            $stmt->bindValue(':permission_value', $value);
-            $stmt->execute();
-          }
-      
-          // Create user role
-          $stmt = $pdo->prepare("INSERT INTO user_role (user_id, role_id, user_type) VALUES (:user_id, :role_id, :user_type)");
-          $stmt->bindValue(':user_id', 1);
-          $stmt->bindValue(':role_id', $role_id);
-          $stmt->bindValue(':user_type', 'admin');
-          $stmt->execute();
-      
-          // Commit transaction
-          $pdo->commit();
-        } catch (PDOException $e) {
-          // Roll back transaction on error
-          $pdo->rollBack();
-          throw $e;
-        }
-      }
 
-      function updateRole($role_id, $role_name, $permissions) {
-        try {
-        //   $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-          $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      
-          // Update the role name
-          $stmt = $pdo->prepare("UPDATE role SET role_name = :role_name WHERE role_id = :role_id");
-          $stmt->bindValue(':role_name', $role_name);
-          $stmt->bindValue(':role_id', $role_id);
-          $stmt->execute();
-      
-          // Update the permissions
-          $stmt = $pdo->prepare("UPDATE role_permission SET permission_value = :permission_value WHERE role_id = :role_id AND permission_id = :permission_id");
-      
-          foreach($permissions as $permission_name => $permission_value) {
-            // Get the permission ID from the permission name
-            $stmt_perm_id = $pdo->prepare("SELECT permission_id FROM permission WHERE permission_name = :permission_name");
-            $stmt_perm_id->bindValue(':permission_name', $permission_name);
-            $stmt_perm_id->execute();
-            $permission_id = $stmt_perm_id->fetchColumn();
-      
-            // Update the permission value for the role
-            $stmt->bindValue(':permission_value', $permission_value);
-            $stmt->bindValue(':role_id', $role_id);
-            $stmt->bindValue(':permission_id', $permission_id);
-            $stmt->execute();
-          }
-      
-          // Commit the transaction
-          $pdo->commit();
-      
-          echo "Role updated successfully!";
-        } catch(PDOException $e) {
-          // Roll back the transaction if something went wrong
-          $pdo->rollback();
-          echo "Error updating role: " . $e->getMessage();
+    public function insertMainImageDetails($imageDetails, $deliverableId)
+    {
+        // Check if the user has access to the deliverable
+        // add transaction  
+        $userId = $this->sessionManagment->getUserId();
+        $userRole = $this->getUserRole($userId);
+
+        if ($userRole != 1) {
+            if (!$this->isMemberOfDeliverable($deliverableId)) {
+                return false;
+            }
         }
-      }
-      
-      
+
+        // Insert file details
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_FILES) != false) {
+
+            $this->connection->beginTransaction();
+            try {
+                // Insert image variant details
+                $stmt = $this->connection->prepare("INSERT INTO files ( deliverable_id, uploaded_by_user_id, file_type) VALUES (?, ?, ?)");
+                $fileType = $imageDetails['image_type'];
+
+                $stmt->bindValue(1, $deliverableId);
+                $stmt->bindValue(2, $userId);
+                $stmt->bindValue(3, $fileType);
+                $stmt->execute();
+                $fileId = $this->connection->lastInsertId();
+
+
+                $stmt = $this->connection->prepare("INSERT INTO image_varients (file_id, name, image_url, size, width, height, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $fileName = $imageDetails['name'];
+                $fileWidth = $imageDetails['width'];
+                $fileHieght = $imageDetails['height'];
+                $filesize = $imageDetails['size'];
+                $fileUrl = $imageDetails['img_url'];
+
+                $stmt->bindValue(1, $fileId);
+                $stmt->bindValue(2, $fileName);
+                $stmt->bindValue(3, $fileUrl);
+                $stmt->bindValue(4, $filesize);
+                $stmt->bindValue(5, $fileWidth);
+                $stmt->bindValue(6, $fileHieght);
+                $stmt->bindValue(7, $fileUrl);
+                $stmt->execute();
+
+                $this->connection->commit();
+                return true;
+            } catch (PDOException $e) {
+                // Roll back transaction on error
+                $this->connection->rollBack();
+                throw $e;
+            }
+        }
+        return false;
+    }
+
+    // function createRoleWithPermissions($permissions)
+    // {
+    //     $pdo = new PDO("mysql:host=localhost;dbname=mydatabase", "username", "password");
+
+    //     // Start transaction
+    //     $pdo->beginTransaction();
+
+    //     try {
+    //         // Create role
+    //         $stmt = $pdo->prepare("INSERT INTO role (name) VALUES (:name)");
+    //         $stmt->bindValue(':name', 'new_role');
+    //         $stmt->execute();
+    //         $role_id = $pdo->lastInsertId();
+
+    //         // Assign permissions to role
+    //         $stmt = $pdo->prepare("INSERT INTO role_permission (role_id, permission_id, permission_value) SELECT :role_id, id, :permission_value FROM permission WHERE name = :name");
+    //         foreach ($permissions as $name => $value) {
+    //             $stmt->bindValue(':role_id', $role_id);
+    //             $stmt->bindValue(':name', $name);
+    //             $stmt->bindValue(':permission_value', $value);
+    //             $stmt->execute();
+    //         }
+
+    //         // Create user role
+    //         $stmt = $pdo->prepare("INSERT INTO user_role (user_id, role_id, user_type) VALUES (:user_id, :role_id, :user_type)");
+    //         $stmt->bindValue(':user_id', 1);
+    //         $stmt->bindValue(':role_id', $role_id);
+    //         $stmt->bindValue(':user_type', 'admin');
+    //         $stmt->execute();
+
+    //         // Commit transaction
+    //         $pdo->commit();
+    //     } catch (PDOException $e) {
+    //         // Roll back transaction on error
+    //         $pdo->rollBack();
+    //         throw $e;
+    //     }
+    // }
+
+    // function updateRole($role_id, $role_name, $permissions)
+    // {
+    //     try {
+    //         //   $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    //         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    //         // Update the role name
+    //         $stmt = $pdo->prepare("UPDATE role SET role_name = :role_name WHERE role_id = :role_id");
+    //         $stmt->bindValue(':role_name', $role_name);
+    //         $stmt->bindValue(':role_id', $role_id);
+    //         $stmt->execute();
+
+    //         // Update the permissions
+    //         $stmt = $pdo->prepare("UPDATE role_permission SET permission_value = :permission_value WHERE role_id = :role_id AND permission_id = :permission_id");
+
+    //         foreach ($permissions as $permission_name => $permission_value) {
+    //             // Get the permission ID from the permission name
+    //             $stmt_perm_id = $pdo->prepare("SELECT permission_id FROM permission WHERE permission_name = :permission_name");
+    //             $stmt_perm_id->bindValue(':permission_name', $permission_name);
+    //             $stmt_perm_id->execute();
+    //             $permission_id = $stmt_perm_id->fetchColumn();
+
+    //             // Update the permission value for the role
+    //             $stmt->bindValue(':permission_value', $permission_value);
+    //             $stmt->bindValue(':role_id', $role_id);
+    //             $stmt->bindValue(':permission_id', $permission_id);
+    //             $stmt->execute();
+    //         }
+
+    //         // Commit the transaction
+    //         $pdo->commit();
+
+    //         echo "Role updated successfully!";
+    //     } catch (PDOException $e) {
+    //         // Roll back the transaction if something went wrong
+    //         $pdo->rollback();
+    //         echo "Error updating role: " . $e->getMessage();
+    //     }
+    // }
 }
