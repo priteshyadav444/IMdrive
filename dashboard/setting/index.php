@@ -22,14 +22,29 @@ require_once '../shared/check-login.php';
     <!-- Start Left menu area -->
     <?php include_once '../shared/left-sidebar.php'; ?>
 
+    <?php
+    $connection = new Connection();
+    $user = new User($connection->getConnection());
+
+    $hasPermissionToViewEmail = false;
+    $hasPermissionToCreateEmail = false;
+    $hasPermissionToUpdateEmail = false;
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_SETTING]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_SETTING]) {
+        $hasPermissionToViewEmail = true;
+    }
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_SETTING]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_SETTING]) {
+        $hasPermissionToCreateEmail = true;
+    }
+    
+    ?>
+
     <!-- End Left menu area -->
     <!-- Start Welcome area -->
     <div class="all-content-wrapper">
         <?php include_once '../shared/header-top.php'; ?>
-
-
         <div class="breadcome-area mg-t-20">
-
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -64,9 +79,9 @@ require_once '../shared/check-login.php';
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                         <div class="product-status-wrap drp-lst">
-                            <h4>Task List</h4>
+                            <h4>Allowed Email</h4>
                             <div class="add-product">
-                                <a data-toggle="modal" data-target="#emailModel">Add Email</a>
+                                <?php if ($hasPermissionToCreateEmail) echo '<a data-toggle="modal" data-target="#emailModel">Add Email</a>'; ?>
                             </div>
                             <div class="asset-inner">
                                 <table>
@@ -79,18 +94,13 @@ require_once '../shared/check-login.php';
                                     </thead>
                                     <tr>
                                         <td>1</td>
-
                                         <td>gmail.com</td>
-
                                         <td>
                                             <div class="material-switch">
                                                 <input id="someSwitchOptionPrimary" name="someSwitchOption001" type="checkbox" />
                                                 <label for="someSwitchOptionPrimary" class="label-primary"></label>
                                             </div>
                                         </td>
-
-
-
                                     </tr>
                             </div>
                             </td>
@@ -124,15 +134,15 @@ require_once '../shared/check-login.php';
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="alert" role="alert">
-                        </div>
+                        <div class="alert alert-success" role="alert" style="display:none;">Email added to the list!</div>
+                        <div class="alert alert-danger" role="alert" style="display:none;">Enter Valid Email Domain ( ex. gmail.com ) </div>
                         <form action="upload.php" method="POST" enctype="multipart/form-data">
                             <div class="form-group">
-                                <label for="image-name" class="col-form-label">Enter Email:</label>
-                                <input type="text" class="form-control" id="image-name" name="email">
+                                <label for="email-name" class="col-form-label">Enter Email:</label>
+                                <input type="text" class="form-control" id="email-name" name="email">
                             </div>
 
-                            <button type="submit" class="btn btn-primary" name="image_upload" value="image_upload">Add Email</button>
+                            <button type="submit" class="btn btn-primary" name="email_upload" value="email_upload">Add Email</button>
                         </form>
                     </div>
                     <div class="modal-footer">
@@ -145,5 +155,33 @@ require_once '../shared/check-login.php';
 
         <?php include_once '../shared/footer-link.php'; ?>
 </body>
+<script>
+    $(document).ready(function() {
+        $('#emailModel').on('submit', function(e) {
+            e.preventDefault();
+            var email = $('#email-name').val();
+            if (/^[a-zA-Z]+\.[a-zA-Z]+$/.test(email) == false) {
+                $('.alert-success').hide();
+                $('.alert-danger').show();
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: "create_email_list.php",
+                data: {
+                    email: email
+                },
+                success: function(response) {
+                    $('.alert-danger').hide();
+                    $('.alert-success').show();
+                },
+                error: function(xhr, status, error) {
+                    $('.alert-success').hide();
+                    $('.alert-danger').show();
+                }
+            });
+        });
+    });
+</script>
 
 </html>

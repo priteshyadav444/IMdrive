@@ -159,12 +159,12 @@ require_once "../Config/SessionConfig.php";
 
                     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_ROLES_PERMISSION]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_ROLES_PERMISSION]) {
                         echo '<li>
-                        <a class="has-arrow" href="../privilage/" aria-expanded="false">
+                        <a class="has-arrow" href="../privilege/" aria-expanded="false">
                             <span class="glyphicon glyphicon-lock" aria-hidden="true"></span>
                             <span class="mini-click-non">Roles</span>
                         </a>
                         <ul class="submenu-angle" aria-expanded="false">
-                            <li><a title="View Roles" href="../privilage/index.php"><span class="mini-sub-pro">View All</span></a></li>
+                            <li><a title="View Roles" href="../privilege/index.php"><span class="mini-sub-pro">View All</span></a></li>
                         </ul>
                         <ul class="submenu-angle" aria-expanded="false">
                             <li><a title="Add Roles" href="../privilege/add-role.php"><span class="mini-sub-pro">Add New Role</span></a></li>

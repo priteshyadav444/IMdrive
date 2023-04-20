@@ -41,7 +41,6 @@ if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_USER]) && $_SESS
 if (!$hasPermissionToViewUser) {
   $connection = new Connection();
   $user = new User($connection->getConnection());
-  // $result = $user->getAllUser();
 
   $row = "";
 

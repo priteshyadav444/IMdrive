@@ -1,6 +1,10 @@
 <?php
 @session_start();
 require_once '../shared/check-login.php';
+if (!hasPermission('create_user')) {
+  $URL = "users.php";
+  header('Location: ' . $URL);
+}
 ?>
 
 <!doctype html>
@@ -31,7 +35,6 @@ require_once '../shared/check-login.php';
 
   <?php
 
-  use Validation\Validators\FileValidator;
   use Validation\Validators\FormValidator;
 
   $obj = new FormValidator();
@@ -41,13 +44,17 @@ require_once '../shared/check-login.php';
   $connection = new Connection();
   $user = new User($connection->getConnection());
 
+  $teams = $user->getAllTeam();
+  $teamOptions = " <option value='null' disabled >Select Team</option>";
+  foreach ($teams as $team) {
+    $teamOptions .= '<option value="' . $team['team_id'] . '">' . $team['team_name'] . '</option>';
+  }
 
-  $options = " <option value='null' disabled >Select Deliverable</option>";
-
-  // $userTypes = $user->getUserTypeRole();
-  // foreach ($userTypes as $userType) {
-  //   $options .= '<option value="' . $deliverable[''] . '">' . $deliverable[''] . '</option>';
-  // }
+  $roles = $user->getAllRoles();
+  $userTypeOptions = " <option value='null' disabled >Select User Type</option>";
+  foreach ($roles as $role) {
+    $userTypeOptions .= '<option value="' . $role['role_id'] . '">' . $role['user_type'] . '</option>';
+  }
 
   // if (isset($_POST['user_create'])) {
   //   $validations = [
@@ -95,7 +102,6 @@ require_once '../shared/check-login.php';
             <div class="product-payment-inner-st">
               <ul id="myTabedu1" class="tab-review-design">
                 <li class="active"><a href="#description">Add User</a></li>
-
               </ul>
               <div id="myTabContent" class="tab-content custom-product-edit">
                 <div class="product-tab-list tab-pane fade active in" id="description">
@@ -119,20 +125,14 @@ require_once '../shared/check-login.php';
                               <div class="form-group">
                                 <div class="form-select-list">
                                   <select class="form-control custom-select-value" name="usertype">
-                                    <option>Select User Type</option>
-                                    <option>Select 2</option>
-                                    <option>Select 3</option>
-                                    <option>Select 4</option>
+                                    <?php echo $userTypeOptions; ?>
                                   </select>
                                 </div>
                               </div>
                               <div class="form-group">
                                 <div class="form-select-list">
                                   <select class="form-control custom-select-value" name="team">
-                                    <option>Select Team</option>
-                                    <option>Select 2</option>
-                                    <option>Select 3</option>
-                                    <option>Select 4</option>
+                                    <?php echo $teamOptions; ?>
                                   </select>
                                 </div>
                               </div>
