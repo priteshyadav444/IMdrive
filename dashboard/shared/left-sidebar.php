@@ -164,10 +164,10 @@ require_once "../Config/SessionConfig.php";
                             <span class="mini-click-non">Roles</span>
                         </a>
                         <ul class="submenu-angle" aria-expanded="false">
-                            <li><a title="View Roles" href="../privilege/index.php"><span class="mini-sub-pro">View All</span></a></li>
+                            <li><a title="View Roles" href="../privilage/index.php"><span class="mini-sub-pro">View All</span></a></li>
                         </ul>
                         <ul class="submenu-angle" aria-expanded="false">
-                            <li><a title="Add Roles" href="privilege/add-privilege.php"><span class="mini-sub-pro">Add New Role</span></a></li>
+                            <li><a title="Add Roles" href="../privilege/add-role.php"><span class="mini-sub-pro">Add New Role</span></a></li>
                         </ul>
                     </li>';
                     }
@@ -190,13 +190,13 @@ require_once "../Config/SessionConfig.php";
 
                     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_SETTING]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_SETTING]) {
                         echo '<li>
-                        <a class="has-arrow" href="all-courses.php" aria-expanded="false">
+                        <a class="has-arrow" href="../setting" aria-expanded="false">
                             <span class="glyphicon glyphicon-cog    " aria-hidden="true"></span>
                             <span class="mini-click-non">Settings</span>
                         </a>
                         <ul class="submenu-angle" aria-expanded="false">
                             <li>
-                                <a title="Add Emails" href="">
+                                <a title="Add Emails" href="../setting">
                                     <span class="mini-sub-pro">Add Email</span>
                                 </a>
                             </li>

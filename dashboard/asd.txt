@@ -66,6 +66,22 @@ JOIN `permissions`
 AND `user_role`.`id` = 1.
 
 
+// project feteching for particular user.
+SELECT 
+                `project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
+                (SELECT GROUP_CONCAT(`deliverable_name`) 
+                 FROM `deliverables` as `dl` JOIN `project_deliverables` As `pd` 
+                 ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
+                 JOIN `deliverable_members` As `dm` 
+                  ON `dl`.`deliverable_id`=`dm`.`deliverable_id` 
+                 WHERE `pd`.`project_id` = `pj`.`project_id` AND `dm`.`user_id` = 1
+                 GROUP BY `pd`.`project_id` )
+                 as `deliverables`,
+                (SELECT count(*) FROM `project_members` as `pm` WHERE `pm`.`project_id` = `pj`.`project_id`) as `member_count` 
+                 FROM `projects` as `pj` WHERE `pj`.`is_archive` = 0 GROUP By `pj`.`project_id`
+
+
+
 
 Update Via Edit Button and create name
 Validation must be same.
@@ -206,3 +222,14 @@ ALTER TABLE `deliverable_member_files`
   ADD CONSTRAINT `project_member_files_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
   ADD CONSTRAINT `project_member_files_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`file_id`);
 
+
+// mian image listing
+
+SELECT iv.*, (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` ) `no_of_varient`
+            FROM `deliverable_members` `dm`
+            JOIN `files` `f` ON f.deliverable_id = dm.deliverable_id
+            JOIN `image_varients` `iv` ON iv.file_id = f.file_id
+            WHERE dm.deliverable_id = 3
+            AND dm.project_file_assigned_type_id = 1
+            AND dm.user_id = 1
+            AND `f`.`file_type` = 1

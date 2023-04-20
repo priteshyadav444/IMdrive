@@ -1,3 +1,8 @@
+<?php
+@session_start();
+require_once '../shared/check-login.php';
+?>
+
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -30,7 +35,43 @@
     <!-- Start Left menu area -->
     <?php
     include_once '../shared/left-sidebar.php';
+    ?>
+    <?php
+    $hasPermissionToCreateTaskLog = false;
 
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK_LOG]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK_LOG]) {
+        $hasPermissionToViewTaskLog = true;
+    }
+
+    if (!$hasPermissionToViewUser) {
+        $connection = new Connection();
+        $user = new User($connection->getConnection());
+        // $result = $user->getTaskLog();
+
+        $row = "";
+
+        foreach ($result as $data) {
+            $row = $row . '
+      
+              ';
+
+            if ($hasPermissionToUpdateUser) {
+                $row = $row . ' 
+                  <td>
+                   <button class="btn btn-link" data-toggle="modal" data-target="#assigneesModal" id=' . $data['role_id'] . '>
+                      View All
+                   </button>
+                  </td>
+                  <td>
+                    <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
+                  </td>
+                <td><button class="btn btn-primary" data-toggle="modal" data-target="#assignModal" id=' . $data['role_id'] . '><i class="glyphicon glyphicon-plus"></i></button></td> </tr>';
+            } else {
+                $row = $row . '</tr>';
+            }
+        }
+    }
 
     ?>
     <!-- End Left menu area -->

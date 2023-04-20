@@ -9,7 +9,7 @@ require_once '../shared/check-login.php';
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>User - Image Drive</title>
+    <title>Tickets - Image Drive</title>
     <meta name="description" content="">
     <?php
     require_once '../shared/head-link.php';
@@ -27,7 +27,24 @@ require_once '../shared/check-login.php';
             // Perform add action with the selected files
         });
     </script>
+    <?php
+    $row =  '<tr id=' . $data["project_id"] . '>
+        <td>' . $data["project_id"] . '</td>
+        <td> ' . $data["deliverables"] . ' </td>
+       
+        <td style="display:' . $data['is_edit_visible'] . ';">
+            <div class="material-switch">
+                <input type="checkbox"  id="archive' . $data["project_id"] . '" name="archive' . $data["project_id"] . '"   ' . $data['is_archive_checked'] . '/>
+                <label for="archive' . $data["project_id"] . '" class="label-primary"></label>
+            </div>
+        </td>
 
+        <td style="display:' . $data['is_edit_visible'] . ';"><button class="btn btn-primary" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i></button></td>
+
+
+    </tr>';
+
+    ?>
 
     <script>
         $(document).ready(function() {
@@ -72,21 +89,15 @@ require_once '../shared/check-login.php';
 		<p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 	<![endif]-->
     <!-- Start Left menu area -->
-    <?php include_once 'left-sidebar.php'; ?>
+    <?php include_once '../shared/left-sidebar.php'; ?>
+
     <!-- End Left menu area -->
     <!-- Start Welcome area -->
     <div class="all-content-wrapper">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="logo-pro">
-                        <a href="index.html"><img class="main-logo" src="img/logo/logo.png" alt="" /></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php include 'headertop.php' ?>
-        <div class="breadcome-area">
+        <?php include_once '../shared/header-top.php'; ?>
+
+
+        <div class="breadcome-area mg-t-20">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
