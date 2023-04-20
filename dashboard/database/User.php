@@ -741,44 +741,68 @@ class User
         return false;
     }
 
-    // function createRoleWithPermissions($permissions)
-    // {
-    //     $pdo = new PDO("mysql:host=localhost;dbname=mydatabase", "username", "password");
+    function createRoleWithPermissions($role_name, $permissions)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_ROLES_PERMISSION) != false) {
 
-    //     // Start transaction
-    //     $pdo->beginTransaction();
+            // Start transaction
+            $this->connection->beginTransaction();
 
-    //     try {
-    //         // Create role
-    //         $stmt = $pdo->prepare("INSERT INTO role (name) VALUES (:name)");
-    //         $stmt->bindValue(':name', 'new_role');
-    //         $stmt->execute();
-    //         $role_id = $pdo->lastInsertId();
+            try {
+                // Create role
+                $stmt = $this->connection->prepare("INSERT INTO `roles` values()");
+                $stmt->execute();
+                $role_id = $this->connection->lastInsertId();
 
-    //         // Assign permissions to role
-    //         $stmt = $pdo->prepare("INSERT INTO role_permission (role_id, permission_id, permission_value) SELECT :role_id, id, :permission_value FROM permission WHERE name = :name");
-    //         foreach ($permissions as $name => $value) {
-    //             $stmt->bindValue(':role_id', $role_id);
-    //             $stmt->bindValue(':name', $name);
-    //             $stmt->bindValue(':permission_value', $value);
-    //             $stmt->execute();
-    //         }
+                // Assign permissions to role
+                $stmt = $this->connection->prepare("INSERT INTO role_permission (role_id, permission_id, permission_value) SELECT :role_id, permission_id, :permission_value FROM permissions WHERE name = :name");
+                foreach ($permissions as $name => $value) {
+                    $stmt->bindValue(':role_id', $role_id);
+                    $stmt->bindValue(':name', $name);
+                    $stmt->bindValue(':permission_value', $value);
+                    $stmt->execute();
+                }
 
-    //         // Create user role
-    //         $stmt = $pdo->prepare("INSERT INTO user_role (user_id, role_id, user_type) VALUES (:user_id, :role_id, :user_type)");
-    //         $stmt->bindValue(':user_id', 1);
-    //         $stmt->bindValue(':role_id', $role_id);
-    //         $stmt->bindValue(':user_type', 'admin');
-    //         $stmt->execute();
+                // Create user role
+                $stmt = $this->connection->prepare("INSERT INTO user_role (role_id, user_type) VALUES (:role_id, :user_type)");
+                $stmt->bindValue(':role_id', $role_id);
+                $stmt->bindValue(':user_type', $role_name);
+                $stmt->execute();
 
-    //         // Commit transaction
-    //         $pdo->commit();
-    //     } catch (PDOException $e) {
-    //         // Roll back transaction on error
-    //         $pdo->rollBack();
-    //         throw $e;
-    //     }
-    // }
+                // Commit transaction
+                $this->connection->commit();
+                return true;
+            } catch (PDOException $e) {
+                // Roll back transaction on error
+                $this->connection->rollBack();
+                // throw $e;
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public function getAllRoles()
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_TICKET_REASON) != false) {
+            try {
+                $sqlQuery = "SELECT * FROM `user_role` ur;";
+                $stmt = $this->connection->prepare($sqlQuery);
+
+                $stmt->execute();
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
 
     // function updateRole($role_id, $role_name, $permissions)
     // {
