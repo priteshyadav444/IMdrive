@@ -1,6 +1,11 @@
 <?php
 @session_start();
 require_once '../shared/check-login.php';
+$deliverableId = $_GET['id'];
+if (!$deliverableId) {
+    $URL = "projects.php";
+    header('Location: ' . $URL);
+}
 ?>
 
 <!doctype html>
@@ -50,7 +55,72 @@ require_once '../shared/check-login.php';
 </head>
 
 <body>
-    <?php include_once '../shared/left-sidebar.php';
+    <?php
+    include_once '../shared/left-sidebar.php';
+
+    $connection = new Connection();
+    $user = new User($connection->getConnection());
+
+    $hasPermissionToViewFiles = false;
+    $hasPermissionToCreateFiles = false;
+    $hasPermissionToUpdateFiles = false;
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_FILES]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_FILES]) {
+        $hasPermissionToViewFiles = true;
+    }
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_FILES]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_FILES]) {
+        $hasPermissionToCreateFiles = true;
+    }
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_FILES]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_FILES]) {
+        $hasPermissionToUpdateFiles = true;
+    }
+
+    if (isset($_GET['id'])) {
+        $result = $user->getMainFileDetails($deliverableId);
+        $row = "";
+
+        foreach ($result as $data) {
+
+            $row = $row . '<tr>
+            <td>  ' . $data["file_id"] . '</td>
+            <td><img src="../' . $data["image_url"] . '" alt="Image"></td>
+
+            <td>
+                <button class="btn btn-link">
+                    <button class="btn btn-link" data-toggle="modal" data-target="#imageModal">' . $data["name"] . '</button>
+                </button>
+
+            </td>
+
+            <td>' . $data["image_url"] . '<i class="fa fa-clipboard copy-icon" aria-hidden="true"></i></td>
+            <td>' . $data["image_url"] . ' <i class="fa fa-clipboard copy-icon" aria-hidden="true"></i></td>
+
+
+            <td> ' . $data["no_of_varient"] . ' varients</td>
+            <td>
+                <ul>
+                    <li>Size: ' . $data["size"] . ' MB</li>
+                    <li>Dimensions:' . $data["width"] . ' x ' . $data["height"] . 'px</li>
+                </ul>
+            </td>
+            <td><button class="btn btn-success btn-sm">Download</button></td>
+            ';
+
+
+            if ($hasPermissionToUpdateFiles) {
+                $row = $row . '<td><button class="btn btn-default btn-sm">Rename</button></td>
+                <td><button class="btn btn-danger btn-sm">Delete</button></td>
+                
+                <td><button class="btn btn-primary btn-sm">Replace</button></td>
+            </tr>';
+            } else {
+                $row = $row . '</tr>';
+            }
+        }
+    }
+
     ?>
     <!-- End Left menu area -->
     <!-- Start Welcome area -->
@@ -100,13 +170,16 @@ require_once '../shared/check-login.php';
                                 <div class="add-product">
                                     <div class="add-product">
                                         <!-- Button trigger modal -->
-                                        <a class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Upload Files</a>
+                                        <a class="btn btn-primary" data-toggle="modal" data-target="#uploadForm">Upload Files</a>
                                     </div>
                                 </div>
 
+                                <?php if ($hasPermissionToCreateFiles) {
+                                }
 
+                                ?>
                                 <!-- Image Upload Modal -->
-                                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal fade" id="uploadForm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -116,71 +189,29 @@ require_once '../shared/check-login.php';
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <form>
+                                                <div class="alert" role="alert">
+                                                </div>
+                                                <form action="upload.php" method="POST" enctype="multipart/form-data">
                                                     <div class="form-group">
                                                         <label for="image-name" class="col-form-label">Image Name:</label>
-                                                        <input type="text" class="form-control" id="image-name">
+                                                        <input type="text" class="form-control" id="image-name" name="image_name">
+                                                        <input type="hidden" class="form-control" id="image-name" name="image_type" value="1">
+                                                        <input type="hidden" class="form-control" id="image-name" name="deliverable_id" value="<?php echo $deliverableId?>">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="main-image-upload" class="col-form-label">Main Image Upload:</label>
-                                                        <input type="file" class="form-control-file" id="main-image-upload">
+                                                        <input name="main_image" type="file" class="form-control" accept="image/png, image/svg, image/jpeg, image/jpg" placeholder="Select Project Logo ">
                                                     </div>
-                                                    <div class="form-group">
-                                                        <label for="variant-image-upload" class="col-form-label">Upload Variant of Image:</label>
-                                                        <input type="file" class="form-control-file" id="variant-image-upload">
-                                                    </div>
-                                                    <div class="multi-uploaded-area mg-b-15">
-                                                        <div class="container-fluid">
-                                                            <div class="row">
-                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                    <div class="alert-title dropzone-custom-sys">
-                                                                        <h2>Drag and Drop file uploads System</h2>
-                                                                        <p>Dropzone Drag and Drop file uploads javascript plugins. Users using an old browser will be able to upload files. If you want the whole body to be a Dropzone and display the files somewhere else you can simply instantiate a
-                                                                            Dropzone object for the body.</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row">
-                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                    <div class="dropzone-pro mg-tb-30">
-                                                                        <div id="dropzone1" class="multi-uploader-cs">
-                                                                            <form action="/upload" class="dropzone dropzone-custom needsclick" id="demo1-upload">
-                                                                                <div class="dz-message needsclick download-custom">
-                                                                                    <i class="fa fa-download" aria-hidden="true"></i>
-                                                                                    <h2>Drop files here or click to upload.</h2>
-                                                                                    <p><span class="note needsclick">(This is just a demo dropzone. Selected files are <strong>not</strong> actually uploaded.)</span>
-                                                                                    </p>
-                                                                                </div>
-                                                                            </form>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                                                    <div class="dropzone-pro">
-                                                                        <div id="dropzone" class="multi-uploader-cs">
-                                                                            <form action="/upload" class="dropzone dropzone-custom needsclick" id="demo-upload">
-                                                                                <div class="dz-message needsclick download-custom">
-                                                                                    <i class="fa fa-cloud-download" aria-hidden="true"></i>
-                                                                                    <h2>Drop files here or click to upload.</h2>
-                                                                                    <p><span class="note needsclick">(This is just a demo dropzone. Selected files are <strong>not</strong> actually uploaded.)</span>
-                                                                                    </p>
-                                                                                </div>
-                                                                            </form>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    <button type="submit" class="btn btn-primary" name="image_upload" value="image_upload">Upload</button>
                                                 </form>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                <button type="button" class="btn btn-primary">Upload</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
 
 
 
@@ -329,51 +360,10 @@ require_once '../shared/check-login.php';
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td><img src="https://via.placeholder.com/150x150" alt="Image"></td>
-
-                                            <td>
-                                                <button class="btn btn-link">
-                                                    <button class="btn btn-link" data-toggle="modal" data-target="#imageModal"> Image 1</button>
-                                                </button>
-
-                                            </td>
-
-                                            <td>/images/image1.jpg <i class="fa fa-clipboard copy-icon" aria-hidden="true"></i></td>
-                                            <td>/images/image1.jpg <i class="fa fa-clipboard copy-icon" aria-hidden="true"></i></td>
+                                        <?php echo $row; ?>
 
 
-                                            <td>2</td>
-                                            <td>
-                                                <ul>
-                                                    <li>Size: 1.2 MB</li>
-                                                    <li>Dimensions: 1024x768 px</li>
-                                                </ul>
-                                            </td>
-                                            <td><button class="btn btn-default btn-sm">Rename</button></td>
-                                            <td><button class="btn btn-danger btn-sm">Delete</button></td>
-                                            <td><button class="btn btn-success btn-sm">Download</button></td>
-                                            <td><button class="btn btn-primary btn-sm">Replace</button></td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td><img src="https://via.placeholder.com/150x150" alt="Image"></td>
-                                            <td><a href="#">Image 2</a></td>
-                                            <td>/path/to/image2.jpg</td>
-                                            <td>/images/image2.jpg</td>
-                                            <td>1</td>
-                                            <td>
-                                                <ul>
-                                                    <li>Size: 2.5 MB</li>
-                                                    <li>Dimensions: 1280x720 px</li>
-                                                </ul>
-                                            </td>
-                                            <td><button class="btn btn-default btn-sm">Rename</button></td>
-                                            <td><button class="btn btn-danger btn-sm">Delete</button></td>
-                                            <td><button class="btn btn-success btn-sm">Download</button></td>
-                                            <td><button class="btn btn-primary btn-sm">Replace</button></td>
-                                        </tr>
+
                                         <!-- add more rows for other images and variants -->
                                     </tbody>
                                 </table>
@@ -404,6 +394,32 @@ require_once '../shared/check-login.php';
     <?php include_once '../shared/footer-link.php'; ?>
 </body>
 </div>
+
+<script>
+    $(document).ready(function() {
+        $('#uploadForm form').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: 'upload.php',
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    $('#uploadForm .alert').removeClass('alert-danger').addClass('alert-success').html('<li> File Uploaded Successfully </li>').show();
+                },
+                error: function(xhr, status, error) {
+                    $('#uploadForm .alert').removeClass('alert-success').addClass('alert-danger').html('<li>' + JSON.parse(xhr.responseText).msg + '</li>').show();
+                }
+            });
+        });
+    });
+</script>
+
 
 </body>
 
