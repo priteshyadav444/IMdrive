@@ -9,20 +9,14 @@ if (empty($_POST['projectId'])) {
 }
 
 
-if (!empty($_POST['newStatus'])) {
+if (!empty($_POST['Archive']) || $_POST['Archive'] == 0) {
     // Update data 
     $projectID = $_POST['projectId'];
-    $newStatus = true;
-    // Connection
-    if ($_POST['newStatus'] == 'on') {
-        $newStatus = false;
-    }
+    $Archive = $_POST['Archive'];
 
     $connection = new Connection();
     $user = new User($connection->getConnection());
-
-    $update = $user->updateProjectArchive($projectID, $newStatus);
-
+    $update = $user->updateProjectArchive($projectID, $Archive);
     if ($update) {
         $response = array('status' => 'success');
     } else {
