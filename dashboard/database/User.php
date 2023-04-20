@@ -14,11 +14,11 @@ class User
      *
      * @return void
      */
-    public function __construct($con, $sessionObject = new SessionManagment())
+    public function __construct($con, $sessionObject = null)
     {
         # Create connection
         $this->connection = $con;
-        $this->sessionManagment = $sessionObject;
+        $this->sessionManagment = new SessionManagment();
     }
 
     /**
@@ -741,7 +741,7 @@ class User
         return false;
     }
 
-    function createRoleWithPermissions($role_name, $permissions)
+    public function createRoleWithPermissions($role_name, $permissions)
     {
         $userId = $this->sessionManagment->getUserId();
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_ROLES_PERMISSION) != false) {
@@ -755,16 +755,35 @@ class User
                 $stmt->execute();
                 $role_id = $this->connection->lastInsertId();
 
+                // Get all permissions
+                $stmt = $this->connection->prepare("SELECT name FROM permissions");
+                $stmt->execute();
+                $allPermissions = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+
                 // Assign permissions to role
                 $stmt = $this->connection->prepare("INSERT INTO role_permission (role_id, permission_id, permission_value) SELECT :role_id, permission_id, :permission_value FROM permissions WHERE name = :name");
-                foreach ($permissions as $name => $value) {
+                foreach ($allPermissions as $name) {
+                    if (array_key_exists($name, $permissions)) {
+                        if ($permissions[$name] == "true")
+                            $permissionValue = true;
+                        else
+                            $permissionValue = false;
+                    } else {
+                        // Set permission value to false if not passed in $permissions array
+                        $permissionValue = false;
+                    }
+                    // Set view_file and view_project permissions to true as per documentation
+                    if ($name == 'view_file' || $name == 'view_project') {
+                        $permissionValue = true;
+                    }
                     $stmt->bindValue(':role_id', $role_id);
                     $stmt->bindValue(':name', $name);
-                    $stmt->bindValue(':permission_value', $value);
+                    $stmt->bindValue(':permission_value', $permissionValue);
                     $stmt->execute();
                 }
 
-                // Create user role
+                // Creating unique user role
                 $stmt = $this->connection->prepare("INSERT INTO user_role (role_id, user_type) VALUES (:role_id, :user_type)");
                 $stmt->bindValue(':role_id', $role_id);
                 $stmt->bindValue(':user_type', $role_name);
@@ -788,14 +807,12 @@ class User
         $userId = $this->sessionManagment->getUserId();
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_TICKET_REASON) != false) {
             try {
-                $sqlQuery = "SELECT * FROM `user_role` ur;";
+                $sqlQuery = "SELECT * FROM `user_role`";
                 $stmt = $this->connection->prepare($sqlQuery);
-
                 $stmt->execute();
-                $result = array();
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    array_push($result, $row);
-                }
+                $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (count($result) == 0)
+                    return false;
                 return $result;
             } catch (PDOException $e) {
                 die($e->getMessage());
@@ -804,10 +821,179 @@ class User
         return false;
     }
 
+
+    public function insertEmail($email)
+    {
+
+        $userId = $this->sessionManagment->getUserId();
+
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_SETTING) != false) {
+            $query = "SELECT id FROM allowed_emails WHERE domain_name = ?";
+            $stmt = $this->connection->prepare($query);
+            $stmt->execute([$email]);
+
+            if ($stmt->rowCount() == 0) {
+                // Domain is not in the table, insert it
+                $query = "INSERT INTO allowed_emails (domain_name, status, created_by_user_id) VALUES (?, 1, ?)";
+                $stmt = $this->connection->prepare($query);
+                $stmt->execute([$email, $userId]);
+
+                // Check if inserted
+                if ($stmt->rowCount() > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    function getAllowedEmailList()
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_SETTING) != false) {
+            $query = "SELECT * status FROM allowed_emails";
+            $stmt = $this->connection->prepare($query);
+            $stmt->execute();
+
+            // Fetch all rows as associative arrays
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $results;
+        }
+    }
+
+
+    function createUser($userDetails, $team_id)
+    {
+        $userId = $this->sessionManagment->getUserId();
+
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::CREATE_USER) != false) {
+            try {
+                $this->connection->beginTransaction();
+
+                $email = $userDetails['email'];
+                $first_name = $userDetails['first_name'];
+                $last_name = $userDetails['last_name'];
+                $password = $userDetails['password'];
+                $description = $userDetails['description'];
+                $user_role_id = $userDetails['user_role_id'];
+
+                // Check if email format is valid
+                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    return false;
+                }
+
+                // Check if user role exists
+                $query = "SELECT COUNT(*) FROM user_roles WHERE user_role_id = ?";
+                $stmt = $this->connection->prepare($query);
+                $stmt->execute([$user_role_id]);
+                if ($stmt->fetchColumn() == 0) {
+                    return false;
+                }
+
+                // Check if team exists
+                if ($team_id != null) {
+                    $query = "SELECT COUNT(*) FROM teams WHERE team_id = ?";
+                    $stmt = $this->connection->prepare($query);
+                    $stmt->execute([$team_id]);
+                    if ($stmt->fetchColumn() == 0) {
+                        return false;
+                    }
+                }
+
+                // Check if email domain is allowed
+                $query = "SELECT COUNT(*) FROM allowed_emails WHERE domain_name = ?";
+                $stmt = $this->connection->prepare($query);
+                $stmt->execute([explode('@', $email)[1]]);
+                if ($stmt->fetchColumn() == 0) {
+                    return false;
+                }
+
+                // Insert user
+                $query = "INSERT INTO users (first_name, last_name, email, password, description, account_status_id, user_role_id) VALUES (?, ?, ?, ?, ?, 1, ?)";
+                $stmt = $this->connection->prepare($query);
+                $stmt->execute([$first_name, $last_name, $email, $password, $description, $user_role_id]);
+                $user_id = $this->connection->lastInsertId();
+
+                // Add user to team if team_id is provided
+                if ($team_id != null) {
+                    $query = "INSERT INTO team_members (team_id, user_id) VALUES (?, ?)";
+                    $stmt = $this->connection->prepare($query);
+                    $stmt->execute([$team_id, $user_id]);
+                }
+                $this->connection->commit();
+            } catch (PDOException $e) {
+                // Roll back transaction on error
+                $this->connection->rollBack();
+                // throw $e;
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function getUserDetails($userId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_USER) != false) {
+
+            $query = "SELECT u.*, tr.user_role_type, t.team_name FROM users u 
+                    INNER JOIN user_role tr ON u.user_role_id = tr.user_role_id 
+                    LEFT JOIN team_members tm ON u.user_id = tm.user_id 
+                    LEFT JOIN teams t ON tm.team_id = t.team_id 
+                    WHERE u.user_id = ?";
+
+            $stmt = $this->connection->prepare($query);
+            $stmt->execute([$userId]);
+
+            if ($stmt->rowCount() > 0) {
+                $userDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+                return $userDetails;
+            } else {
+                return false;
+            }
+        }
+    }
+
+
+    public function getTeamMembersByTeamId($teamId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_USER) != false) {
+            $query = "SELECT u.*, t.team_name
+              FROM team_members tm
+              INNER JOIN users u ON tm.user_id = u.user_id
+              INNER JOIN teams t ON tm.team_id = t.team_id
+              WHERE tm.team_id = ?";
+
+            $stmt = $this->connection->prepare($query);
+            $stmt->execute([$teamId]);
+            $teamMembers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return $teamMembers;
+        }
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
     // function updateRole($role_id, $role_name, $permissions)
     // {
     //     try {
-    //         //   $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    //         //   $this->connection = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     //         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     //         // Update the role name
