@@ -5,11 +5,11 @@ require_once "../database/User.php";
 
 if (empty($_POST['projectId'])) {
     $URL = "projects.php";
-    header('Location: ' . $URL);
+    // header('Location: ' . $URL);
 }
 
 
-if (!empty($_POST['Archive']) || $_POST['Archive'] == 0) {
+if (isset($_POST['Archive'])) {
     // Update data 
     $projectID = $_POST['projectId'];
     $Archive = $_POST['Archive'];

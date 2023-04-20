@@ -262,7 +262,7 @@ require_once '../shared/check-login.php';
                     success: function(response) {
                         if (response.status == "success") {
                             // Remove the row from the table
-                            // checkbox.closest('tr').hide();
+                            checkbox.closest('tr').hide();
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
@@ -286,7 +286,7 @@ require_once '../shared/check-login.php';
                     dataType: "json",
                     success: function(response) {
 
-                        $('button.pd-setting').removeClass('pd-setting').addClass('sd-setting').text('In Active');
+                        // $('button.pd-setting').removeClass('pd-setting').addClass('sd-setting').text('In Active');
 
                         // var row = $('#' + projectId);
                         // if (response.statusId == 1) {
