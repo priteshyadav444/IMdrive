@@ -46,6 +46,8 @@ require_once '../shared/check-login.php';
     // Generate select options
     $connection = new Connection();
     $user = new User($connection->getConnection());
+
+
     $options = " <option value='null' disabled >Select Deliverable</option>";
 
     $deliverables = $user->getAllDelverable();

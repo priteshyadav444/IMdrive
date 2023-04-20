@@ -196,7 +196,7 @@ if (!$deliverableId) {
                                                         <label for="image-name" class="col-form-label">Image Name:</label>
                                                         <input type="text" class="form-control" id="image-name" name="image_name">
                                                         <input type="hidden" class="form-control" id="image-name" name="image_type" value="1">
-                                                        <input type="hidden" class="form-control" id="image-name" name="deliverable_id" value="<?php echo $deliverableId?>">
+                                                        <input type="hidden" class="form-control" id="image-name" name="deliverable_id" value="<?php echo $deliverableId ?>">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="main-image-upload" class="col-form-label">Main Image Upload:</label>
