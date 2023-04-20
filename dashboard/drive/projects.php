@@ -239,22 +239,30 @@ require_once '../shared/check-login.php';
     <script type="text/javascript">
         $(document).ready(function() {
             $('input[type="checkbox"][name^="archive"]').on("change", function() {
-                var newStatus = $(this).val();
+                var Archive = $(this).is(":checked");
+
                 var projectId = $(this).closest("tr").attr('id');
                 var checkbox = $(this);
+
+
+                if (Archive == true) {
+                    Archive = 1;
+                } else {
+                    Archive = 0;
+                }
+
                 $.ajax({
                     url: "update_project.php",
                     method: "POST",
                     data: {
                         projectId: projectId,
-                        newStatus: newStatus
+                        Archive: Archive
                     },
                     dataType: "json",
                     success: function(response) {
-                        console.log(projectId);
                         if (response.status == "success") {
                             // Remove the row from the table
-                            checkbox.closest('tr').hide();
+                            // checkbox.closest('tr').hide();
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
@@ -286,7 +294,7 @@ require_once '../shared/check-login.php';
                         // } else {
                         //     row.find('#StatusText').text('In Active');
                         // }
-                        
+
                         // // Update the checkbox state
                         // row.find('input[type="checkbox"][name^="status"]').prop('checked', newStatus);
                         // // Update the button class
