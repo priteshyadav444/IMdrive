@@ -53,34 +53,42 @@ if (!hasPermission('create_user')) {
   $roles = $user->getAllRoles();
   $userTypeOptions = " <option value='null' disabled >Select User Type</option>";
   foreach ($roles as $role) {
-    $userTypeOptions .= '<option value="' . $role['role_id'] . '">' . $role['user_type'] . '</option>';
+    $userTypeOptions .= '<option value="' . $role['id'] . '">' . $role['user_type'] . '</option>';
   }
 
-  // if (isset($_POST['user_create'])) {
-  //   $validations = [
-  //     'name' => 'required|string',
-  //     'description' => 'required|string',
-  //     'logo' => "required|filetype:{$extention}|max:40000",
-  //   ];
+  $isFormDataValid = false;
+  if (isset($_POST['submit_create_user'])) {
+    $validations = [
+      'first_name' => 'required|string',
+      'last_name' => 'required|string',
+      'email' => 'required|email',
+      'password' => 'required|password',
+      'description' => 'required',
+      'usertype' => 'required',
+      'team' => 'required',
+    ];
 
-  //   $path = "../project-logo";
+    // if all validation Passed
+    if (!$obj->validate($_POST, $validations)->isError()) {
 
+      $userDetails['first_name'] = $obj->senitizeInput($_POST['first_name']);
+      $userDetails['last_name'] = $obj->senitizeInput($_POST['last_name']);
+      $userDetails['email'] = $_POST['email'];
+      $userDetails['description'] = $obj->senitizeInput($_POST['description']);
+      $userDetails['password'] = $_POST['password'];
+      $userDetails['usertype'] =  $_POST['usertype'];
+      $userDetails['team'] =  $_POST['team'];
 
-  //   // if all validation Passed
-  //   if (!$obj->validate($_POST, $validations)->isError() && $isValidFilefomat) {
+      $connection = new Connection();
+      $user = new User($connection->getConnection());
 
-  //     $img_url = $file->upload();
-  //     $projectDetails['name'] = $obj->senitizeInput($_POST['name']);
-  //     $projectDetails['deliverable_id'] = $_POST['deliverable'];
-  //     $projectDetails['description'] = $obj->senitizeInput($_POST['description']);
-  //     $projectDetails['img_url'] = ltrim($img_url, '.');
-
-  //     $connection = new Connection();
-  //     $user = new User($connection->getConnection());
-
-  //     $isFormDataValid = $user->createProject($projectDetails);
-  //   }
-  // }
+      $isFormDataValid = $user->createUser($userDetails);
+      if ($isFormDataValid == false) {
+        $obj->setError("Something Went Wrong", "custom");
+        $isValidDeliverable = false;
+      }
+    }
+  }
 
   // 
   ?>
@@ -92,10 +100,10 @@ if (!hasPermission('create_user')) {
   <!-- End Left menu area -->
   <!-- Start Welcome area -->
   <div class="all-content-wrapper">
-    <?php include_once '../shared/logolink.php'; ?>
+    <?php include_once '../shared/header-top.php'; ?>
 
     <!-- Single pro tab review Start-->
-    <div class="single-pro-review-area mt-t-30 mg-b-15 mg-t-15">
+    <div class="single-pro-review-area mt-t-30 mg-b-15 mg-t-20">
       <div class="container-fluid">
         <div class="row">
           <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -108,12 +116,29 @@ if (!hasPermission('create_user')) {
                   <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                       <div class="review-content-section">
-                        <form id="add-department" action="" class="add-department">
+                        <?php
+                        if ($obj->isError() != false && isset($_POST['submit_create_user'])) {
+                          echo '<div class="alert alert-danger" role="alert">';
+                          foreach ($obj->all() as $error)
+                            echo "<li>$error</li>";
+                          echo '</div>';
+                        } else if (isset($isFormDataValid) && $isFormDataValid  && isset($_POST['submit_create_user'])) {
+                          echo '<div class="alert alert-success" role="alert">';
+                          echo "<li>User Created Successfully </li>";
+                          echo '</div>';
+                        }
+                        ?>
+                        <form id="add-department" action="" class="add-department" method="POST">
                           <div class="row">
                             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                               <div class="form-group">
-                                <input name="name" type="text" class="form-control" placeholder="Name">
+                                <input name="first_name" type="text" class="form-control" placeholder="First Name">
                               </div>
+
+                              <div class="form-group">
+                                <input name="last_name" type="text" class="form-control" placeholder="Last Name">
+                              </div>
+
                               <div class="form-group">
                                 <input name="email" type="email" class="form-control" placeholder="Email">
                               </div>
@@ -144,7 +169,7 @@ if (!hasPermission('create_user')) {
                           <div class="row">
                             <div class="col-lg-12">
                               <div class="payment-adress">
-                                <button type="submit" class="btn btn-primary waves-effect waves-light">Submit</button>
+                                <button type="submit" class="btn btn-primary waves-effect waves-light" name="submit_create_user" value="submit_create_user">Submit</button>
                               </div>
                             </div>
                           </div>

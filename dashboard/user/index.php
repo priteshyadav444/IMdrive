@@ -38,31 +38,57 @@ if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_USER]) && $_SESS
   $hasPermissionToUpdateUser = true;
 }
 
-if (!$hasPermissionToViewUser) {
+if ($hasPermissionToViewUser) {
   $connection = new Connection();
   $user = new User($connection->getConnection());
-
+  $result = $user->getUserDetails();
   $row = "";
 
   foreach ($result as $data) {
-    $row = $row . '
+    $accountStatus = '<button class="ds-setting">In Active</button>';
+    $isToggleChecked = "";
+    if ($data['account_status_id'] == 1) {
+      $isToggleChecked = "checked";
+      $accountStatus = '<button class="pd-setting">Active</button>';
+    }
 
+    $row = $row . '
+    <td>
+    ' . $data['user_id'] . '
+    </td>
+    <td>
+    ' . $data['created_at'] . '
+    </td>
+    <td>
+    ' . $data['name'] . '
+    </td>
+    <td>
+    ' . $data['email'] . '
+    </td>
+    <td>
+    ' . $data['user_type'] . '
+    </td>
+    <td>
+    ' . $data['team_name'] . '
+    </td>
+
+    <td>
+    ' . $accountStatus . '
+    </td>
         ';
 
     if ($hasPermissionToUpdateUser) {
       $row = $row . ' 
-            <td>
-             <button class="btn btn-link" data-toggle="modal" data-target="#assigneesModal" id=' . $data['role_id'] . '>
-                View All
-             </button>
-            </td>
-            <td>
-              <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
-            </td>
-          <td><button class="btn btn-primary" data-toggle="modal" data-target="#assignModal" id=' . $data['role_id'] . '><i class="glyphicon glyphicon-plus"></i></button></td> </tr>';
-    } else {
-      $row = $row . '</tr>';
+      <td >
+      <div class="material-switch">
+          <input type="checkbox"  id="user' . $data["user_id"] . '" name="user' . $data["user_id"] . '"   ' . $isToggleChecked . '/>
+          <label for="user' . $data["user_id"] . '" class="label-primary"></label>
+      </div>
+  </td>
+      ';
     }
+
+    $row = $row . '</tr>';
   }
 }
 ?>
@@ -132,24 +158,7 @@ if (!$hasPermissionToViewUser) {
                       <th>Status</th>
                       <th>Change Status</th>
                     </tr>
-                    <tr>
-                      <td>1</td>
-                      <td>12/03/2022</td>
-                      <td>John Alva</td>
-                      <td>admin@gmail.com</td>
-                      <td>users</td>
-                      <td>Admin Panel Web, BackEnd </td>
-                      <td>
-                        <button class="pd-setting">Active</button>
-                      </td>
-
-                      <td>
-                        <div class="material-switch">
-                          <input id="someSwitchOptionPrimary" name="someSwitchOption001" type="checkbox" />
-                          <label for="someSwitchOptionPrimary" class="label-primary"></label>
-                        </div>
-                      </td>
-                    </tr>
+                    <?php echo $row ?>
                 </div>
                 </td>
                 </table>
