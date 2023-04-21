@@ -231,13 +231,13 @@ class User
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_DELIVERABLE) != false) {
             try {
 
-                $sqlQuery = "SELECT `dl`.`deliverable_id`, `dl`.`deliverable_name`,
-                (SELECT COUNT(*) FROM 
-                 `deliverable_members` AS `dm` 
-                WHERE `dm`.`deliverable_id` = `dl`.`deliverable_id`) AS `member_count`
+                $sqlQuery = "SELECT `pd`.`project_deliverable_id` As `deliverable_id`, `dl`.`deliverable_name`,
+                (SELECT COUNT(*) FROM  `deliverable_members` AS `dm` WHERE `dm`.`project_deliverable_id` = `pd`.`project_deliverable_id`) as 'member_count'
                 from `project_deliverables` as `pd`, `deliverables` as `dl`
                 WHERE `pd`.`project_id`= ? AND 
-                `pd`.`deliverable_id` = `dl`.`deliverable_id`";
+                `pd`.`deliverable_id` = `dl`.`deliverable_id`
+                
+                ";
                 $stmt = $this->connection->prepare($sqlQuery);
                 $stmt->bindValue(1, $projectId);
 
@@ -488,6 +488,7 @@ class User
         $userId = $this->sessionManagment->getUserId();
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_PROJECT) != false) {
             try {
+
                 $sqlQuery = "SELECT 
                 `project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
                 (SELECT GROUP_CONCAT(`deliverable_name`) 
@@ -495,16 +496,28 @@ class User
                  ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
                  WHERE `pd`.`project_id` = `pj`.`project_id` 
                  GROUP BY `pd`.`project_id` )
-                 as `deliverables`,
-                (SELECT count(*) FROM `project_members` as `pm` WHERE `pm`.`project_id` = `pj`.`project_id`) as `member_count` 
+                 as `deliverables`
                  FROM `projects` as `pj` WHERE `pj`.`is_archive` = 0 GROUP By `pj`.`project_id`; ";
 
                 $stmt = $this->connection->prepare($sqlQuery);
                 $stmt->execute();
 
                 $result = array();
-                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    array_push($result, $row);
+                $memberCountQuery = "(SELECT count(*) AS `total_member`
+                FROM  
+                (SELECT DISTINCT(`dm`.`user_id`)
+                FROM `project_deliverables` AS  `pd` 
+                JOIN `deliverable_members`  AS `dm`
+                ON  `pd`.`project_deliverable_id` = `dm`.`project_deliverable_id`
+                AND `pd`.`project_id` = ?)  `member_table`)
+                ";
+                $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($projects as $project) {
+                    $stmt = $this->connection->prepare($memberCountQuery);
+                    $stmt->bindValue(1, $project['project_id']);
+                    $stmt->execute();
+                    $project['member_count'] = $stmt->fetch(PDO::FETCH_COLUMN);
+                    array_push($result, $project);
                 }
                 return $result;
             } catch (PDOException $e) {
@@ -564,7 +577,7 @@ class User
 
     private function getProjectFileAssignedTypeId($deliverableId, $userId)
     {
-        $sql = "SELECT project_file_assigned_type_id FROM deliverable_members WHERE deliverable_id = :deliverableId AND user_id = :userId";
+        $sql = "SELECT project_file_assigned_type_id FROM deliverable_members WHERE project_deliverable_id = :deliverableId AND user_id = :userId";
         $stmt = $this->connection->prepare($sql);
         $stmt->bindParam(':deliverableId', $deliverableId, PDO::PARAM_INT);
         $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
@@ -591,12 +604,12 @@ class User
             if ($userRole == 1) {
                 // listing for admin  
                 $sqlQuery = "SELECT  
-                 iv.*,  
-                 (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` ) `no_of_varient`
-                 FROM files f
-                 LEFT JOIN image_varients iv ON f.file_id = iv.file_id
-                 WHERE f.deliverable_id = :deliverable_id
-                 AND `f`.`file_type` = :file_type";
+                iv.*,  
+               (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` AND `f`.`file_type` = 2 ) `no_of_varient`
+               FROM files f
+               LEFT JOIN image_varients iv ON f.file_id = iv.file_id
+               WHERE f.project_deliverable_id = :deliverable_id
+               AND `f`.`file_type` = :file_type;";
 
                 $stmt = $this->connection->prepare($sqlQuery);
                 $stmt->bindParam(':deliverable_id', $deliverableId, PDO::PARAM_INT);
@@ -661,10 +674,7 @@ class User
             }
 
             $stmt->execute();
-            $result = array();
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                array_push($result, $row);
-            }
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $result;
         }
         return false;
@@ -706,7 +716,7 @@ class User
             $this->connection->beginTransaction();
             try {
                 // Insert image variant details
-                $stmt = $this->connection->prepare("INSERT INTO files ( deliverable_id, uploaded_by_user_id, file_type) VALUES (?, ?, ?)");
+                $stmt = $this->connection->prepare("INSERT INTO files ( project_deliverable_id, uploaded_by_user_id, file_type) VALUES (?, ?, ?)");
                 $fileType = $imageDetails['image_type'];
 
                 $stmt->bindValue(1, $deliverableId);
@@ -868,7 +878,7 @@ class User
     }
 
 
-    function createUser($userDetails,)
+    public function createUser($userDetails,)
     {
         $userId = $this->sessionManagment->getUserId();
 
@@ -988,14 +998,7 @@ class User
         }
         return false;
     }
-
-
-
-
-
-
-
-
+    // function get all the details for project
 
 
     // function updateRole($role_id, $role_name, $permissions)

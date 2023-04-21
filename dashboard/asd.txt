@@ -237,3 +237,77 @@ SELECT iv.*, (SELECT count(*) FROM `files_varient` where `files_varient`.`main_f
 
 
 - Bug in Validation for check string. if string charecter is 1 than it return false
+
+
+select count(SELECT DISTINCT(`dm`.`user_id`) 
+FROM `project_deliverables` AS  `pd` 
+RIGHT JOIN `deliverable_members`  AS `dm`
+ON  `pd`.`deliverable_id` = `dm`.`deliverable_id`
+AND `pd`.`project_id` = 53);
+
+
+SELECT count(*) AS `total_member`
+FROM  
+(SELECT DISTINCT(`dm`.`user_id`)
+FROM `project_deliverables` AS  `pd` 
+RIGHT JOIN `deliverable_members`  AS `dm`
+ON  `pd`.`deliverable_id` = `dm`.`deliverable_id`
+AND `pd`.`project_id` = 53 GROUP BY `dm`.`user_id`)  `member_table`;
+
+
+
+
+
+$memberCountQuery = "(SELECT count(*) AS `total_member`
+FROM  
+(SELECT DISTINCT(`dm`.`user_id`)
+FROM `project_deliverables` AS  `pd` 
+RIGHT JOIN `deliverable_members`  AS `dm`
+ON  `pd`.`project_deliverable_id` = `dm`.`project_deliverable_id`
+AND `pd`.`project_id` = 53)  `member_table`) AS 
+`member_count`";
+SELECT 
+                `project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
+                (SELECT GROUP_CONCAT(`deliverable_name`),
+                ".$memberCountQuery."
+                 FROM `deliverables` as `dl` JOIN `project_deliverables` As `pd` 
+                 ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
+                 WHERE `pd`.`project_id` = `pj`.`project_id` 
+                 GROUP BY `pd`.`project_id` )
+                 as `deliverables`
+                 FROM `projects` as `pj` WHERE `pj`.`is_archive` = 0;
+
+
+
+// delivrable detaisl for project
+SELECT `dl`.`deliverable_id`, `dl`.`deliverable_name`
+from `project_deliverables` as `pd`, `deliverables` as `dl`
+WHERE `pd`.`project_id`= 1 AND 
+`pd`.`deliverable_id` = `dl`.`deliverable_id`
+
+
+// 
+add primary key in project_deliverable pd_id
+
+
+1) add foreign of pd_id in deliverable_member
+alter TABLE `files` add CONSTRAINT FOREIGN key(project_deliverable_id) REFERENCES project_deliverables(project_deliverable_id);
+
+alter table deliverable_members add COLUMN project_deliverable_id int unsigned;
+alter TABLE `deliverable_members` add CONSTRAINT FOREIGN key(project_deliverable_id) REFERENCES project_deliverables(project_deliverable_id);
+
+
+
+
+2) and foreign key of files pd_id
+3) and foreign key of deliverable member_files pd_id
+add fk in files 
+add fk in file_varient
+add deliverable member files.
+
+ ALTER TABLE exam
+ ADD COLUMN student_id INT;
+
+ALTER TABLE table_name
+ADD FOREIGN KEY (column_name)
+REFERENCE table_name(Referencing column_name in table_name);
