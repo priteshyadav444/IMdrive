@@ -93,13 +93,13 @@ require_once "../Config/SessionConfig.php";
 
                     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_USER]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_USER]) {
                         echo ' <li>
-                        <a class="has-arrow" href="../user/users.php" aria-expanded="false">
+                        <a class="has-arrow" href="../user/" aria-expanded="false">
                             <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                             <span class="mini-click-non">Users</span>
                         </a>
                         <ul class="submenu-angle" aria-expanded="false">
                             <li>
-                                    <a title="User List" href="../user/users.php">
+                                    <a title="User List" href="../user/">
                                         <span class="mini-sub-pro">User List
                                         </span>
                                     </a>

@@ -233,3 +233,7 @@ SELECT iv.*, (SELECT count(*) FROM `files_varient` where `files_varient`.`main_f
             AND dm.project_file_assigned_type_id = 1
             AND dm.user_id = 1
             AND `f`.`file_type` = 1
+
+
+
+- Bug in Validation for check string. if string charecter is 1 than it return false

@@ -1,7 +1,14 @@
 <?php
 @session_start();
 require_once '../shared/check-login.php';
+require_once '../Config/SessionConfig.php';
+require_once '../Config/Privilege.php';
+require_once "../library/validation/vendor/autoload.php";
+require_once "../database/Connection.php";
+require_once "../database/User.php";
 ?>
+
+
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -28,7 +35,6 @@ require_once '../shared/check-login.php';
 
     $hasPermissionToViewEmail = false;
     $hasPermissionToCreateEmail = false;
-    $hasPermissionToUpdateEmail = false;
 
     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_SETTING]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_SETTING]) {
         $hasPermissionToViewEmail = true;
@@ -37,7 +43,43 @@ require_once '../shared/check-login.php';
     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_SETTING]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::CREATE_SETTING]) {
         $hasPermissionToCreateEmail = true;
     }
-    
+
+    if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_SETTING]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::UPDATE_SETTING]) {
+        $hasPermissionToUpdateEmail = true;
+    }
+
+
+    if ($hasPermissionToViewEmail) {
+        $connection = new Connection();
+        $user = new User($connection->getConnection());
+
+        $row = "";
+        $result = $user->getAllowedEmailList();
+        var_dump($result);
+        foreach ($result as $data) {
+            $row = $row . ' 
+                <td>  ' . $data["id"] . '</td>
+                <td>  ' . $data["domain_name"] . '</td>
+            ';
+            $data["status_checked"] = false;
+            if ($data["status"] == 1) {
+                $data["status_checked"] = "checked";
+            }
+            if ($hasPermissionToUpdateEmail) {
+                $row = $row . ' <td>
+                    <div class="material-switch">
+                        <input type="checkbox" id="status' . $data["id"] . '"  name="status' . $data["id"] . '"    ' . $data['status_checked'] . '/>
+                        <label for="status' . $data["id"] . '" class="label-primary"></label>
+                    </div>
+                </td>';
+            }
+            $row = $row . '</tr>';
+        }
+    }
+
+
+
+
     ?>
 
     <!-- End Left menu area -->
@@ -92,16 +134,7 @@ require_once '../shared/check-login.php';
                                             <th>Active</th>
                                         </tr>
                                     </thead>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>gmail.com</td>
-                                        <td>
-                                            <div class="material-switch">
-                                                <input id="someSwitchOptionPrimary" name="someSwitchOption001" type="checkbox" />
-                                                <label for="someSwitchOptionPrimary" class="label-primary"></label>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <?php echo $row; ?>
                             </div>
                             </td>
                             </table>
