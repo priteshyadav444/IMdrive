@@ -2,7 +2,7 @@
 class Privilege
 {
     const VIEW_DASHBOARD = "view_dashboard";
-    
+
     const VIEW_DRIVE = "view_drive";
     const CREATE_DRIVE = "create_drive";
     const UPDATE_DRIVE = "update_drive";
@@ -59,4 +59,5 @@ class Privilege
 
     const VIEW_SETTING = "view_setting";
     const CREATE_SETTING = "create_setting";
+    const UPDATE_SETTING = "update_setting";
 }
