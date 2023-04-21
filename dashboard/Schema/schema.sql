@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 20, 2023 at 10:34 PM
--- Server version: 10.4.27-MariaDB
--- PHP Version: 8.0.25
+-- Generation Time: Apr 21, 2023 at 06:26 PM
+-- Server version: 10.4.27-MariaDB-log
+-- PHP Version: 8.1.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -43,21 +43,6 @@ INSERT INTO `account_status` (`account_status_id`, `account_status_type_name`) V
 -- --------------------------------------------------------
 
 --
--- Table structure for table `admins`
---
-
-CREATE TABLE `admins` (
-  `admin_id` int(10) UNSIGNED NOT NULL,
-  `first_name` varchar(60) NOT NULL,
-  `last_name` varchar(60) DEFAULT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(100) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `allowed_emails`
 --
 
@@ -73,9 +58,7 @@ CREATE TABLE `allowed_emails` (
 --
 
 INSERT INTO `allowed_emails` (`id`, `domain_name`, `status`, `created_by_user_id`) VALUES
-(1, 'sd.co', 1, 1),
-(2, 'gmail.com', 1, 1),
-(3, 'asdas.cas', 1, 1);
+(1, 'gmail.com', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -109,8 +92,8 @@ INSERT INTO `deliverables` (`deliverable_id`, `deliverable_name`, `created_by_ad
 --
 
 CREATE TABLE `deliverable_members` (
-  `deliverable_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL,
+  `project_deliverable_id` int(10) UNSIGNED DEFAULT NULL,
   `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -119,8 +102,8 @@ CREATE TABLE `deliverable_members` (
 -- Dumping data for table `deliverable_members`
 --
 
-INSERT INTO `deliverable_members` (`deliverable_id`, `user_id`, `project_file_assigned_type_id`, `created_at`) VALUES
-(3, 1, 1, '2023-04-19 12:05:56');
+INSERT INTO `deliverable_members` (`user_id`, `project_deliverable_id`, `project_file_assigned_type_id`, `created_at`) VALUES
+(8, 6, 1, '2023-04-21 12:34:02');
 
 -- --------------------------------------------------------
 
@@ -130,7 +113,8 @@ INSERT INTO `deliverable_members` (`deliverable_id`, `user_id`, `project_file_as
 
 CREATE TABLE `deliverable_member_files` (
   `user_id` int(10) UNSIGNED NOT NULL,
-  `file_id` int(10) UNSIGNED NOT NULL
+  `file_id` int(10) UNSIGNED NOT NULL,
+  `project_deliverable_id` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -141,7 +125,7 @@ CREATE TABLE `deliverable_member_files` (
 
 CREATE TABLE `files` (
   `file_id` int(10) UNSIGNED NOT NULL,
-  `deliverable_id` int(10) UNSIGNED NOT NULL,
+  `project_deliverable_id` int(10) UNSIGNED DEFAULT NULL,
   `file_type` tinyint(3) UNSIGNED DEFAULT NULL COMMENT 'filetype for main file or varient',
   `uploaded_by_user_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -150,17 +134,10 @@ CREATE TABLE `files` (
 -- Dumping data for table `files`
 --
 
-INSERT INTO `files` (`file_id`, `deliverable_id`, `file_type`, `uploaded_by_user_id`) VALUES
-(1, 3, 1, 1),
-(2, 3, 2, 1),
-(4, 3, 1, 1),
-(5, 2, 1, 1),
-(6, 3, 1, 1),
-(7, 2, 1, 1),
-(8, 3, 1, 1),
-(9, 3, 1, 1),
-(10, 4, 1, 1),
-(11, 3, 1, 1);
+INSERT INTO `files` (`file_id`, `project_deliverable_id`, `file_type`, `uploaded_by_user_id`) VALUES
+(13, 6, 1, 1),
+(14, 6, 1, 1),
+(15, 6, 1, 10);
 
 -- --------------------------------------------------------
 
@@ -170,15 +147,9 @@ INSERT INTO `files` (`file_id`, `deliverable_id`, `file_type`, `uploaded_by_user
 
 CREATE TABLE `files_varient` (
   `main_file_id` int(10) UNSIGNED NOT NULL,
-  `varient_file_id` int(10) UNSIGNED NOT NULL
+  `varient_file_id` int(10) UNSIGNED NOT NULL,
+  `project_deliverable_id` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `files_varient`
---
-
-INSERT INTO `files_varient` (`main_file_id`, `varient_file_id`) VALUES
-(1, 2);
 
 -- --------------------------------------------------------
 
@@ -219,16 +190,9 @@ CREATE TABLE `image_varients` (
 --
 
 INSERT INTO `image_varients` (`file_id`, `image_url`, `name`, `size`, `width`, `height`, `thumbnail_url`, `folder_id`, `created_at`) VALUES
-(1, '/project-logo/2f7b46f8-594e-48d2-ba3e-fbc06590758d.jpg', 'Main ', '12', '12', '12', '/project-logo/2f7b46f8-594e-48d2-ba3e-fbc06590758d.jpg', NULL, '2023-04-20 05:43:31'),
-(2, '/project-logo/2f7b46f8-594e-48d2-ba3e-fbc06590758d...\r\n', 'Varient Image ', '12', '12', '12', '/project-logo/2f7b46f8-594e-48d2-ba3e-fbc06590758d...\r\n', NULL, '2023-04-20 06:15:33'),
-(4, '0.56789779663086', 'asd', '0.56789779663086', '5974', '3208', '0.56789779663086', NULL, '2023-04-20 10:10:58'),
-(5, '0.27659797668457', 'New Images', '0.27659797668457', '933', '1927', '0.27659797668457', NULL, '2023-04-20 10:11:41'),
-(6, '../project-logo/e3161a57-a0e1-41a6-96b9-7038a4c92cc0.png', 'asd', '0.56789779663086', '5974', '3208', '../project-logo/e3161a57-a0e1-41a6-96b9-7038a4c92cc0.png', NULL, '2023-04-20 10:13:03'),
-(7, '/project-logo/244eda97-384b-4162-8dc5-d34151a4b2fd.png', 'asd', '0.27659797668457', '933', '1927', '/project-logo/244eda97-384b-4162-8dc5-d34151a4b2fd.png', NULL, '2023-04-20 10:13:56'),
-(8, '/project-logo/803803b2-4087-4c08-b07d-4a225e8a8e79.jpg', 'asdasd', '0.027029991149902', '640', '640', '/project-logo/803803b2-4087-4c08-b07d-4a225e8a8e79.jpg', NULL, '2023-04-20 10:14:38'),
-(9, '/project-logo/86ed249a-2b4c-43bd-b9f6-40ca599477e8.png', 'asd', '0.0020961761474609', '128', '128', '/project-logo/86ed249a-2b4c-43bd-b9f6-40ca599477e8.png', NULL, '2023-04-20 10:14:50'),
-(10, '/project-logo/fb3e32d2-8a22-4745-9776-ded78667e838.jpg', 'asdsad', '0.027029991149902', '640', '640', '/project-logo/fb3e32d2-8a22-4745-9776-ded78667e838.jpg', NULL, '2023-04-20 10:15:37'),
-(11, '/project-logo/a8d12a7f-1a8e-4c52-b429-91eb9a58806b.jpg', 'asda', '0.017688751220703', '640', '640', '/project-logo/a8d12a7f-1a8e-4c52-b429-91eb9a58806b.jpg', NULL, '2023-04-20 10:36:23');
+(13, '/project-logo/7e72a9cc-fcd0-4acb-9f14-baeda0fe9dcc.png', 'asd', '0.56789779663086', '5974', '3208', '/project-logo/7e72a9cc-fcd0-4acb-9f14-baeda0fe9dcc.png', NULL, '2023-04-21 11:53:44'),
+(14, '/project-logo/02d6c1c1-ebc5-436c-a92e-5f03c079f511.png', 'asd', '0.27659797668457', '933', '1927', '/project-logo/02d6c1c1-ebc5-436c-a92e-5f03c079f511.png', NULL, '2023-04-21 12:04:59'),
+(15, '/project-logo/83c77d22-0d57-405f-97a4-35314fb44f96.jpg', 'Avatar', '0.017688751220703', '640', '640', '/project-logo/83c77d22-0d57-405f-97a4-35314fb44f96.jpg', NULL, '2023-04-21 12:29:46');
 
 -- --------------------------------------------------------
 
@@ -315,10 +279,9 @@ CREATE TABLE `projects` (
 --
 
 INSERT INTO `projects` (`project_id`, `created_by_admin_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`, `created_at`, `updated_at`) VALUES
-(52, 1, '/project-logo/cc90adf8-e9b5-4e42-b539-23beaaa9604a.png', 'Project Test ', 'asdads', 1, 1, '2023-04-19 07:11:15', '2023-04-19 07:11:15'),
-(53, 1, '/project-logo/3ef96e0a-f746-4a2d-a596-de82d5e4439c.png', 'Project 1', 'asdads', 1, 1, '2023-04-19 08:10:06', '2023-04-19 08:10:06'),
-(54, 1, '/project-logo/2f7b46f8-594e-48d2-ba3e-fbc06590758d.jpg', 'Projcet 2', 'asdas', 1, 1, '2023-04-19 09:28:12', '2023-04-19 09:28:12'),
-(55, 1, '/project-logo/a3788de4-7f62-421c-aa01-a714f2405119.png', 'asd', 'asdasd', 1, 0, '2023-04-20 13:26:30', '2023-04-20 13:26:30');
+(58, 1, '/project-logo/cfef9147-d0d5-4188-aa56-3aac85cc0f4b.png', 'Courtney Merritt', 'Excepturi iste dolor', 1, 0, '2023-04-21 11:06:18', '2023-04-21 11:06:18'),
+(59, 1, '/project-logo/cc14a9a5-c3b9-4881-be35-cd64b955f2aa.png', 'Ulla Jimenez', 'Enim expedita offici', 1, 0, '2023-04-21 11:35:12', '2023-04-21 11:35:12'),
+(60, 1, '/project-logo/15fa1dc2-f083-40f2-a8a5-2df623d58c93.png', 'Ivor Mcpherson', 'Aperiam magni exerci', 1, 0, '2023-04-21 12:32:15', '2023-04-21 12:32:15');
 
 -- --------------------------------------------------------
 
@@ -327,6 +290,7 @@ INSERT INTO `projects` (`project_id`, `created_by_admin_id`, `logo_url`, `name`,
 --
 
 CREATE TABLE `project_deliverables` (
+  `project_deliverable_id` int(10) UNSIGNED NOT NULL,
   `project_id` int(10) UNSIGNED NOT NULL,
   `deliverable_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -335,14 +299,21 @@ CREATE TABLE `project_deliverables` (
 -- Dumping data for table `project_deliverables`
 --
 
-INSERT INTO `project_deliverables` (`project_id`, `deliverable_id`) VALUES
-(52, 3),
-(53, 3),
-(54, 2),
-(54, 3),
-(54, 4),
-(55, 2),
-(55, 3);
+INSERT INTO `project_deliverables` (`project_deliverable_id`, `project_id`, `deliverable_id`) VALUES
+(6, 58, 12),
+(7, 58, 13),
+(8, 59, 1),
+(9, 59, 2),
+(10, 59, 3),
+(11, 59, 4),
+(12, 59, 12),
+(13, 59, 13),
+(14, 60, 1),
+(15, 60, 2),
+(16, 60, 3),
+(17, 60, 4),
+(18, 60, 12),
+(19, 60, 13);
 
 -- --------------------------------------------------------
 
@@ -362,30 +333,6 @@ CREATE TABLE `project_file_assigned_types` (
 INSERT INTO `project_file_assigned_types` (`project_file_assigned_type_id`, `name`) VALUES
 (1, 'ALL'),
 (2, 'CUSTOM');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `project_members`
---
-
-CREATE TABLE `project_members` (
-  `project_id` int(10) UNSIGNED NOT NULL,
-  `user_id` int(10) UNSIGNED NOT NULL,
-  `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `project_member_files`
---
-
-CREATE TABLE `project_member_files` (
-  `user_id` int(10) UNSIGNED NOT NULL,
-  `file_id` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -423,9 +370,16 @@ CREATE TABLE `roles` (
 
 INSERT INTO `roles` (`role_id`, `created_on`) VALUES
 (1, '2023-04-14 10:44:18'),
-(38, '2023-04-20 22:54:38'),
-(39, '2023-04-20 22:56:39'),
-(40, '2023-04-20 23:01:05');
+(7, '2023-04-20 17:30:53'),
+(8, '2023-04-20 17:31:30'),
+(9, '2023-04-20 17:32:21'),
+(10, '2023-04-20 17:32:26'),
+(11, '2023-04-20 17:33:16'),
+(12, '2023-04-20 17:33:19'),
+(19, '2023-04-20 17:45:37'),
+(25, '2023-04-20 17:49:01'),
+(31, '2023-04-20 17:54:47'),
+(33, '2023-04-21 12:52:17');
 
 -- --------------------------------------------------------
 
@@ -488,138 +442,101 @@ INSERT INTO `role_permission` (`role_id`, `permission_id`, `permission_value`) V
 (1, 80, 1),
 (1, 81, 1),
 (1, 82, 1),
-(38, 39, 0),
-(38, 40, 0),
-(38, 41, 0),
-(38, 42, 1),
-(38, 43, 0),
-(38, 44, 0),
-(38, 45, 0),
-(38, 46, 0),
-(38, 47, 0),
-(38, 48, 0),
-(38, 49, 0),
-(38, 50, 0),
-(38, 51, 0),
-(38, 52, 0),
-(38, 53, 0),
-(38, 54, 0),
-(38, 55, 0),
-(38, 56, 0),
-(38, 57, 0),
-(38, 58, 0),
-(38, 59, 0),
-(38, 60, 0),
-(38, 61, 0),
-(38, 62, 0),
-(38, 63, 0),
-(38, 64, 0),
-(38, 65, 0),
-(38, 66, 0),
-(38, 67, 0),
-(38, 68, 0),
-(38, 69, 0),
-(38, 70, 0),
-(38, 71, 0),
-(38, 72, 0),
-(38, 73, 0),
-(38, 74, 0),
-(38, 75, 0),
-(38, 76, 0),
-(38, 77, 0),
-(38, 78, 0),
-(38, 79, 0),
-(38, 80, 0),
-(38, 81, 0),
-(38, 82, 0),
-(39, 39, 0),
-(39, 40, 0),
-(39, 41, 0),
-(39, 42, 1),
-(39, 43, 0),
-(39, 44, 0),
-(39, 45, 0),
-(39, 46, 0),
-(39, 47, 0),
-(39, 48, 0),
-(39, 49, 0),
-(39, 50, 0),
-(39, 51, 0),
-(39, 52, 0),
-(39, 53, 0),
-(39, 54, 0),
-(39, 55, 0),
-(39, 56, 0),
-(39, 57, 0),
-(39, 58, 0),
-(39, 59, 0),
-(39, 60, 0),
-(39, 61, 0),
-(39, 62, 0),
-(39, 63, 0),
-(39, 64, 0),
-(39, 65, 0),
-(39, 66, 0),
-(39, 67, 0),
-(39, 68, 0),
-(39, 69, 0),
-(39, 70, 0),
-(39, 71, 0),
-(39, 72, 0),
-(39, 73, 0),
-(39, 74, 0),
-(39, 75, 0),
-(39, 76, 0),
-(39, 77, 0),
-(39, 78, 0),
-(39, 79, 0),
-(39, 80, 0),
-(39, 81, 0),
-(39, 82, 0),
-(40, 39, 0),
-(40, 40, 1),
-(40, 41, 1),
-(40, 42, 1),
-(40, 43, 1),
-(40, 44, 1),
-(40, 45, 0),
-(40, 46, 0),
-(40, 47, 0),
-(40, 48, 1),
-(40, 49, 1),
-(40, 50, 1),
-(40, 51, 1),
-(40, 52, 1),
-(40, 53, 1),
-(40, 54, 1),
-(40, 55, 0),
-(40, 56, 0),
-(40, 57, 0),
-(40, 58, 0),
-(40, 59, 0),
-(40, 60, 0),
-(40, 61, 1),
-(40, 62, 0),
-(40, 63, 0),
-(40, 64, 0),
-(40, 65, 0),
-(40, 66, 0),
-(40, 67, 1),
-(40, 68, 1),
-(40, 69, 1),
-(40, 70, 1),
-(40, 71, 1),
-(40, 72, 1),
-(40, 73, 1),
-(40, 74, 0),
-(40, 75, 0),
-(40, 76, 0),
-(40, 77, 0),
-(40, 78, 0),
-(40, 79, 0),
-(40, 80, 0),
-(40, 81, 0),
-(40, 82, 0);
+(19, 40, 0),
+(19, 41, 0),
+(19, 43, 0),
+(19, 44, 0),
+(19, 48, 0),
+(19, 49, 0),
+(19, 50, 0),
+(19, 51, 0),
+(19, 52, 0),
+(19, 53, 0),
+(19, 54, 0),
+(19, 58, 0),
+(19, 59, 0),
+(19, 60, 0),
+(19, 71, 0),
+(19, 72, 0),
+(19, 73, 0),
+(25, 40, 0),
+(25, 41, 0),
+(25, 43, 0),
+(25, 44, 0),
+(25, 48, 0),
+(25, 49, 0),
+(25, 50, 0),
+(25, 51, 0),
+(25, 52, 0),
+(25, 53, 0),
+(25, 54, 0),
+(25, 58, 0),
+(25, 59, 0),
+(25, 60, 0),
+(25, 71, 0),
+(25, 72, 0),
+(25, 73, 0),
+(31, 40, 0),
+(31, 41, 0),
+(31, 43, 0),
+(31, 44, 0),
+(31, 48, 0),
+(31, 49, 0),
+(31, 50, 0),
+(31, 51, 0),
+(31, 52, 0),
+(31, 53, 0),
+(31, 54, 0),
+(31, 58, 0),
+(31, 59, 0),
+(31, 60, 0),
+(31, 71, 0),
+(31, 72, 0),
+(31, 73, 0),
+(33, 39, 0),
+(33, 40, 0),
+(33, 41, 0),
+(33, 42, 1),
+(33, 43, 1),
+(33, 44, 1),
+(33, 45, 0),
+(33, 46, 0),
+(33, 47, 0),
+(33, 48, 1),
+(33, 49, 1),
+(33, 50, 1),
+(33, 51, 1),
+(33, 52, 1),
+(33, 53, 1),
+(33, 54, 1),
+(33, 55, 0),
+(33, 56, 0),
+(33, 57, 0),
+(33, 58, 1),
+(33, 59, 0),
+(33, 60, 1),
+(33, 61, 1),
+(33, 62, 0),
+(33, 63, 0),
+(33, 64, 0),
+(33, 65, 0),
+(33, 66, 0),
+(33, 67, 1),
+(33, 68, 1),
+(33, 69, 1),
+(33, 70, 1),
+(33, 71, 1),
+(33, 72, 1),
+(33, 73, 1),
+(33, 74, 0),
+(33, 75, 0),
+(33, 76, 0),
+(33, 77, 0),
+(33, 78, 0),
+(33, 79, 0),
+(33, 80, 0),
+(33, 81, 0),
+(33, 82, 0);
 
 -- --------------------------------------------------------
 
@@ -677,6 +594,15 @@ CREATE TABLE `team_members` (
   `team_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `team_members`
+--
+
+INSERT INTO `team_members` (`team_id`, `user_id`) VALUES
+(7, 8),
+(8, 9),
+(8, 10);
 
 -- --------------------------------------------------------
 
@@ -749,7 +675,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `first_name`, `last_name`, `email`, `password`, `description`, `account_status_id`, `user_role_id`, `created_at`, `updated_at`) VALUES
-(1, 'Pritesh', 'Y', 'pritesh@mail.com', 'Pritesh4@', 'i am admin.', 1, 1, '2023-04-14 05:24:42', '2023-04-14 05:24:42');
+(1, 'Pritesh', 'Y', 'pritesh@mail.com', 'Pritesh4@', 'i am admin.', 1, 1, '2023-04-14 05:24:42', '2023-04-14 05:24:42'),
+(8, 'Maite', 'Joseph', 'xytil@gmail.com', 'Pa$$w0rd!', 'Omnis laboris nihil', 1, 11, '2023-04-21 06:46:43', '2023-04-21 06:46:43'),
+(9, 'Aadrash', 'halder', 'abc123@gmail.com', 'Pritesh4@', 'i am php developer', 1, 25, '2023-04-21 07:16:47', '2023-04-21 07:16:47'),
+(10, 'Autumn', 'Parker', 'admin@gmail.com', 'Pritesh4@', 'Mollitia quam distin', 1, 1, '2023-04-21 12:29:07', '2023-04-21 12:29:07');
 
 -- --------------------------------------------------------
 
@@ -781,9 +710,10 @@ CREATE TABLE `user_role` (
 
 INSERT INTO `user_role` (`id`, `user_type`, `role_id`, `created_on`) VALUES
 (1, 'admin', 1, '2023-04-14 05:22:24'),
-(30, 'ads', 38, '2023-04-20 17:24:38'),
-(31, 'custom', 39, '2023-04-20 17:26:39'),
-(32, 'user uploader', 40, '2023-04-20 17:31:05');
+(11, 'user', 19, '2023-04-20 12:15:37'),
+(17, 'asd', 25, '2023-04-20 12:19:01'),
+(23, 'asdasd', 31, '2023-04-20 12:24:47'),
+(25, 'uploader', 33, '2023-04-21 07:22:17');
 
 --
 -- Indexes for dumped tables
@@ -794,12 +724,6 @@ INSERT INTO `user_role` (`id`, `user_type`, `role_id`, `created_on`) VALUES
 --
 ALTER TABLE `account_status`
   ADD PRIMARY KEY (`account_status_id`);
-
---
--- Indexes for table `admins`
---
-ALTER TABLE `admins`
-  ADD PRIMARY KEY (`admin_id`);
 
 --
 -- Indexes for table `allowed_emails`
@@ -819,31 +743,33 @@ ALTER TABLE `deliverables`
 -- Indexes for table `deliverable_members`
 --
 ALTER TABLE `deliverable_members`
-  ADD KEY `deliverable_id` (`deliverable_id`),
   ADD KEY `user_id` (`user_id`),
-  ADD KEY `project_file_assigned_type_id` (`project_file_assigned_type_id`);
+  ADD KEY `project_file_assigned_type_id` (`project_file_assigned_type_id`),
+  ADD KEY `project_deliverable_id` (`project_deliverable_id`);
 
 --
 -- Indexes for table `deliverable_member_files`
 --
 ALTER TABLE `deliverable_member_files`
   ADD KEY `deliverable_member_files_ibfk_1` (`user_id`),
-  ADD KEY `deliverable_member_files_ibfk_2` (`file_id`);
+  ADD KEY `deliverable_member_files_ibfk_2` (`file_id`),
+  ADD KEY `project_deliverable_id` (`project_deliverable_id`);
 
 --
 -- Indexes for table `files`
 --
 ALTER TABLE `files`
   ADD PRIMARY KEY (`file_id`),
-  ADD KEY `deliverable_id` (`deliverable_id`),
-  ADD KEY `uploaded_by_user_id` (`uploaded_by_user_id`);
+  ADD KEY `uploaded_by_user_id` (`uploaded_by_user_id`),
+  ADD KEY `project_deliverable_id` (`project_deliverable_id`);
 
 --
 -- Indexes for table `files_varient`
 --
 ALTER TABLE `files_varient`
   ADD UNIQUE KEY `main_file_id` (`main_file_id`,`varient_file_id`),
-  ADD KEY `files_varient_files_ibfk_2` (`varient_file_id`);
+  ADD KEY `files_varient_files_ibfk_2` (`varient_file_id`),
+  ADD KEY `project_deliverable_id` (`project_deliverable_id`);
 
 --
 -- Indexes for table `folders`
@@ -879,6 +805,7 @@ ALTER TABLE `projects`
 -- Indexes for table `project_deliverables`
 --
 ALTER TABLE `project_deliverables`
+  ADD PRIMARY KEY (`project_deliverable_id`),
   ADD KEY `project_id` (`project_id`),
   ADD KEY `deliverable_id` (`deliverable_id`);
 
@@ -887,21 +814,6 @@ ALTER TABLE `project_deliverables`
 --
 ALTER TABLE `project_file_assigned_types`
   ADD PRIMARY KEY (`project_file_assigned_type_id`);
-
---
--- Indexes for table `project_members`
---
-ALTER TABLE `project_members`
-  ADD KEY `project_id` (`project_id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `project_file_assigned_type_id` (`project_file_assigned_type_id`);
-
---
--- Indexes for table `project_member_files`
---
-ALTER TABLE `project_member_files`
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `file_id` (`file_id`);
 
 --
 -- Indexes for table `project_status`
@@ -999,16 +911,10 @@ ALTER TABLE `account_status`
   MODIFY `account_status_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `admins`
---
-ALTER TABLE `admins`
-  MODIFY `admin_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `allowed_emails`
 --
 ALTER TABLE `allowed_emails`
-  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `deliverables`
@@ -1020,7 +926,7 @@ ALTER TABLE `deliverables`
 -- AUTO_INCREMENT for table `files`
 --
 ALTER TABLE `files`
-  MODIFY `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `file_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `folders`
@@ -1038,7 +944,13 @@ ALTER TABLE `permissions`
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `project_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `project_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+
+--
+-- AUTO_INCREMENT for table `project_deliverables`
+--
+ALTER TABLE `project_deliverables`
+  MODIFY `project_deliverable_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `project_file_assigned_types`
@@ -1056,7 +968,7 @@ ALTER TABLE `project_status`
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `role_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `role_id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `task_types`
@@ -1092,13 +1004,13 @@ ALTER TABLE `ticket_status`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `user_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `user_role`
 --
 ALTER TABLE `user_role`
-  MODIFY `id` smallint(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` smallint(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- Constraints for dumped tables
@@ -1120,30 +1032,32 @@ ALTER TABLE `deliverables`
 -- Constraints for table `deliverable_members`
 --
 ALTER TABLE `deliverable_members`
-  ADD CONSTRAINT `deliverable_members_ibfk_1` FOREIGN KEY (`deliverable_id`) REFERENCES `deliverables` (`deliverable_id`),
   ADD CONSTRAINT `deliverable_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `deliverable_members_ibfk_3` FOREIGN KEY (`project_file_assigned_type_id`) REFERENCES `project_file_assigned_types` (`project_file_assigned_type_id`);
+  ADD CONSTRAINT `deliverable_members_ibfk_3` FOREIGN KEY (`project_file_assigned_type_id`) REFERENCES `project_file_assigned_types` (`project_file_assigned_type_id`),
+  ADD CONSTRAINT `deliverable_members_ibfk_4` FOREIGN KEY (`project_deliverable_id`) REFERENCES `project_deliverables` (`project_deliverable_id`);
 
 --
 -- Constraints for table `deliverable_member_files`
 --
 ALTER TABLE `deliverable_member_files`
   ADD CONSTRAINT `deliverable_member_files_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `deliverable_member_files_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`file_id`);
+  ADD CONSTRAINT `deliverable_member_files_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`file_id`),
+  ADD CONSTRAINT `deliverable_member_files_ibfk_3` FOREIGN KEY (`project_deliverable_id`) REFERENCES `project_deliverables` (`project_deliverable_id`);
 
 --
 -- Constraints for table `files`
 --
 ALTER TABLE `files`
-  ADD CONSTRAINT `files_ibfk_1` FOREIGN KEY (`deliverable_id`) REFERENCES `deliverables` (`deliverable_id`),
-  ADD CONSTRAINT `files_ibfk_2` FOREIGN KEY (`uploaded_by_user_id`) REFERENCES `users` (`user_id`);
+  ADD CONSTRAINT `files_ibfk_2` FOREIGN KEY (`uploaded_by_user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `files_ibfk_3` FOREIGN KEY (`project_deliverable_id`) REFERENCES `project_deliverables` (`project_deliverable_id`);
 
 --
 -- Constraints for table `files_varient`
 --
 ALTER TABLE `files_varient`
   ADD CONSTRAINT `files_varient_files_ibfk_1` FOREIGN KEY (`main_file_id`) REFERENCES `files` (`file_id`),
-  ADD CONSTRAINT `files_varient_files_ibfk_2` FOREIGN KEY (`varient_file_id`) REFERENCES `files` (`file_id`);
+  ADD CONSTRAINT `files_varient_files_ibfk_2` FOREIGN KEY (`varient_file_id`) REFERENCES `files` (`file_id`),
+  ADD CONSTRAINT `files_varient_ibfk_1` FOREIGN KEY (`project_deliverable_id`) REFERENCES `project_deliverables` (`project_deliverable_id`);
 
 --
 -- Constraints for table `folders`
@@ -1172,21 +1086,6 @@ ALTER TABLE `projects`
 ALTER TABLE `project_deliverables`
   ADD CONSTRAINT `project_deliverables_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`),
   ADD CONSTRAINT `project_deliverables_ibfk_2` FOREIGN KEY (`deliverable_id`) REFERENCES `deliverables` (`deliverable_id`);
-
---
--- Constraints for table `project_members`
---
-ALTER TABLE `project_members`
-  ADD CONSTRAINT `project_members_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`),
-  ADD CONSTRAINT `project_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `project_members_ibfk_3` FOREIGN KEY (`project_file_assigned_type_id`) REFERENCES `project_file_assigned_types` (`project_file_assigned_type_id`);
-
---
--- Constraints for table `project_member_files`
---
-ALTER TABLE `project_member_files`
-  ADD CONSTRAINT `project_member_files_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
-  ADD CONSTRAINT `project_member_files_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`file_id`);
 
 --
 -- Constraints for table `role_permission`
