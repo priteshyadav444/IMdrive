@@ -49,6 +49,8 @@ class User
             die($e->getMessage());
         }
     }
+
+
     /**
      * getPrivailages : return All the Privilages in key value Pair wherr key is permission name and value is Boolean value (if true allowed elseif false than Not Allowed) 
      *
@@ -855,7 +857,7 @@ class User
     {
         $userId = $this->sessionManagment->getUserId();
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_SETTING) != false) {
-            $query = "SELECT * status FROM allowed_emails";
+            $query = "SELECT * FROM allowed_emails";
             $stmt = $this->connection->prepare($query);
             $stmt->execute();
 
@@ -866,7 +868,7 @@ class User
     }
 
 
-    function createUser($userDetails, $team_id)
+    function createUser($userDetails,)
     {
         $userId = $this->sessionManagment->getUserId();
 
@@ -879,15 +881,20 @@ class User
                 $last_name = $userDetails['last_name'];
                 $password = $userDetails['password'];
                 $description = $userDetails['description'];
-                $user_role_id = $userDetails['user_role_id'];
+                $user_role_id = $userDetails['usertype'];
+                $team_id = $userDetails['team'];
+
+
+
 
                 // Check if email format is valid
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     return false;
                 }
 
+
                 // Check if user role exists
-                $query = "SELECT COUNT(*) FROM user_roles WHERE user_role_id = ?";
+                $query = "SELECT COUNT(*) FROM user_role WHERE id = ?";
                 $stmt = $this->connection->prepare($query);
                 $stmt->execute([$user_role_id]);
                 if ($stmt->fetchColumn() == 0) {
@@ -903,7 +910,6 @@ class User
                         return false;
                     }
                 }
-
                 // Check if email domain is allowed
                 $query = "SELECT COUNT(*) FROM allowed_emails WHERE domain_name = ?";
                 $stmt = $this->connection->prepare($query);
@@ -911,6 +917,7 @@ class User
                 if ($stmt->fetchColumn() == 0) {
                     return false;
                 }
+
 
                 // Insert user
                 $query = "INSERT INTO users (first_name, last_name, email, password, description, account_status_id, user_role_id) VALUES (?, ?, ?, ?, ?, 1, ?)";
@@ -936,23 +943,24 @@ class User
         return false;
     }
 
-    public function getUserDetails($userId)
+    public function getUserDetails()
     {
         $userId = $this->sessionManagment->getUserId();
 
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_USER) != false) {
 
-            $query = "SELECT u.*, tr.user_role_type, t.team_name FROM users u 
-                    INNER JOIN user_role tr ON u.user_role_id = tr.user_role_id 
-                    LEFT JOIN team_members tm ON u.user_id = tm.user_id 
-                    LEFT JOIN teams t ON tm.team_id = t.team_id 
-                    WHERE u.user_id = ?";
+            $query = "SELECT u.user_id, u.created_at, CONCAT(u.first_name, ' ', u.last_name) as name, u.email,  tr.user_type, t.team_name, u.account_status_id FROM users u 
+            INNER JOIN user_role tr ON u.user_role_id = tr.id 
+            LEFT JOIN team_members tm ON u.user_id = tm.user_id 
+            LEFT JOIN teams t ON tm.team_id = t.team_id 
+            WHERE u.user_id != 1;
+                    ";
 
             $stmt = $this->connection->prepare($query);
-            $stmt->execute([$userId]);
+            $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
-                $userDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+                $userDetails = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 return $userDetails;
             } else {
                 return false;
