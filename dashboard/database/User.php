@@ -953,6 +953,8 @@ class User
         return false;
     }
 
+
+
     public function getUserDetails()
     {
         $userId = $this->sessionManagment->getUserId();
@@ -998,6 +1000,104 @@ class User
         }
         return false;
     }
+
+    public function getProjectFilesByUser($projectId, $userId)
+    {
+        // Check file assigned type for user
+        $userIdViewer = $this->sessionManagment->getUserId();
+        $userRole = $this->getUserRole($userIdViewer);
+
+        if ($this->checkPrivilages($userRole, Privilege::VIEW_DRIVE) != false) {
+
+            $query = "SELECT project_deliverables.project_deliverable_id, deliverable_members.project_file_assigned_type_id 
+            FROM deliverable_members JOIN project_deliverables
+            ON project_deliverables.project_deliverable_id = deliverable_members.project_deliverable_id
+            WHERE deliverable_members.user_id =  :userId  AND project_deliverables.project_id = :project_id";
+            $stmt = $this->connection->prepare($query);
+            $stmt->execute(['userId' => $userId, 'project_id' => $projectId]);
+
+            $deliverables = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $files = array();
+
+            foreach ($deliverables as $deliverable) {
+                // Check fileAssignedType for deliverable
+                $fileAssignedType = $deliverable['project_file_assigned_type_id'];
+
+                if ($fileAssignedType == 1) {
+                    // Fetch all files for the deliverable from files table
+                    $query = "SELECT image_varients.* FROM files 
+                    JOIN image_varients
+                    ON files.file_id = image_varients.file_id
+                    WHERE project_deliverable_id = :deliverableId AND file_type = 1 ";
+                    $stmt = $this->connection->prepare($query);
+                    $stmt->execute(['deliverableId' => $deliverable['project_deliverable_id']]);
+                    $deliverableFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Add files to the result array
+                    $files = array_merge($files, $deliverableFiles);
+                } elseif ($fileAssignedType == 2) {
+                    // Fetch files for the deliverable from deliverable_member_files table
+                    $query = "SELECT files.* FROM deliverable_member_files 
+                    INNER JOIN files ON deliverable_member_files.file_id = files.file_id 
+                    JOIN image_varients ON image_varients.file_id = files.file_id
+                    WHERE deliverable_member_files.user_id = :userId
+                    AND deliverable_member_files.project_deliverable_id = :deliverableId
+                    AND files.file_type = 1";
+
+                    $stmt = $this->connection->prepare($query);
+                    $stmt->execute(['userId' => $userId, 'deliverableId' => $deliverable['project_deliverable_id']]);
+                    $deliverableFiles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    // Add files to the result array
+                    $files = array_merge($files, $deliverableFiles);
+                    return $files;
+                }
+            }
+            return $files;
+        }
+        return false;
+    }
+
+    public function getAllUserOfProject($projectId)
+    {
+        $userIdViewer = $this->sessionManagment->getUserId();
+        $userRole = $this->getUserRole($userIdViewer);
+
+        if ($this->checkPrivilages($userRole, Privilege::VIEW_DRIVE) != false) {
+            $query = "SELECT `dm`.`user_id`, CONCAT(`us`.`first_name`, ' ', `us`.`last_name` ) AS `name`
+            FROM `project_deliverables` AS  `pd` 
+            JOIN `deliverable_members`  AS `dm`
+            ON  `pd`.`project_deliverable_id` = `dm`.`project_deliverable_id`
+            JOIN `users` as `us`
+            ON `us`.`user_id` = `dm`.`user_id`
+            WHERE `pd`.`project_id` = :projectId";
+            $stmt = $this->connection->prepare($query);
+            $stmt->bindParam(":projectId", $projectId);
+            $stmt->execute();
+            $userDetails = $stmt->fetchAll();
+            return $userDetails;
+        }
+    }
+    public function getUserFileProject($projectId)
+    {
+        $users = $this->getAllUserOfProject($projectId);
+        // var_dump($users);
+        if (!is_array($users)) {
+            return false;
+        }
+        foreach ($users as &$user) {
+            $files = $this->getProjectFilesByUser($projectId, $user['user_id']);
+            $user['files'] = array();
+            if (is_array($files))
+                $user['files'] = $files;
+        }
+        return $users;
+    }
+
+
+
+
     // function get all the details for project
 
 
