@@ -107,13 +107,13 @@ require_once '../shared/check-login.php';
             <button data-toggle="tooltip" title="Edit" class="pd-setting-ed"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></button>
         </td>
         </td>
-        <td >
-            <button class="btn btn-link" data-toggle="modal" data-target="#assigneesModal">
+        <td>
+            <button class="btn btn-link" data-toggle="modal" data-target="#assignedMembersList" id=' . $data["project_id"] . ' >
             ' . $data["member_count"] . ' Assignees
             </button>
         </td>
 
-        <td style="display:' . $data['is_edit_visible'] . ';"><button class="btn btn-primary" data-toggle="modal" data-target="#assignModal"><i class="glyphicon glyphicon-plus"></i></button></td>
+        <td style="display:' . $data['is_edit_visible'] . ';"><button class="btn btn-primary btn-assign" data-toggle="modal" data-target="#assignModal" id=' . $data["project_id"] . ' ><i class="glyphicon glyphicon-plus"></i></button></td>
 
 
     </tr>';
@@ -316,6 +316,124 @@ require_once '../shared/check-login.php';
                     }
                 });
             });
+
+
+
+
+
+
+            $(document).on('click', '.btn-link', function() {
+                var projectId = $(this).attr('id');
+                $.ajax({
+                    url: 'getAssignerDetails.php?id=' + projectId,
+                    type: 'POST',
+                    data: {
+                        project_id: projectId
+                    },
+                    success: function(response) {
+                        // Handle the response from the API, e.g. display the member list in a modal
+                        var membersData = response;
+                        console.log(response);
+
+                        var assignedMembersModal = $('#assignedMembersList');
+
+                        var assignedMembersList = assignedMembersModal.find('ul');
+                        assignedMembersList.empty();
+
+                        // Loop through each member in the data array
+                        $.each(membersData, function(index, member) {
+                            // Create a new list item for the member
+                            // Create a new list item for the member
+                            var listItem = $('<li>').addClass('list-group-item');
+
+                            // Create a row to contain the name and button
+                            var row = $('<div>').addClass('row');
+                            listItem.append(row);
+
+                            // Add the member's name to the row
+                            var nameCol = $('<div>').addClass('col-xs-8');
+                            var memberName = $('<span>').text(member.name);
+                            nameCol.append(memberName);
+                            row.append(nameCol);
+
+                            // Add the button to view the member's assigned files to the row
+                            var buttonCol = $('<div>').addClass('col-xs-4 text-right');
+                            var viewFilesButton = $('<button>').addClass('btn btn-sm btn-primary btn-outline-secondary').text('View Files');
+                            viewFilesButton.data('member', member);
+                            buttonCol.append(viewFilesButton);
+                            row.append(buttonCol);
+
+                            // Add the list item to the assigned members list
+                            assignedMembersList.append(listItem);;
+                        });
+
+                        // Add a click event to the View Files buttons
+                        assignedMembersList.on('click', 'button', function() {
+                            // Get the member data from the button's data attribute
+                            var member = $(this).data('member');
+
+                            // Get a reference to the modal and the list of assigned files
+                            var assignedFilesModal = $('#assignedFilesModal');
+                            var assignedFilesList = assignedFilesModal.find('#assignedFilesList');
+
+                            // Set the member's name in the modal title
+                            var modalTitle = 'Files Assigned to ' + member.name;
+                            assignedFilesModal.find('#assignedFilesModalLabel').text(modalTitle);
+                            assignedFilesModal.find('#memberName').text(member.name);
+
+                            // Clear any existing files from the list
+                            assignedFilesList.empty();
+
+                            // Loop through each file assigned to the member
+                            $.each(member.files, function(index, file) {
+                                // Create a new list item for the file
+                                var listItem = $('<li>').addClass('list-group-item');
+
+                                // Add the file's name to the list item
+                                var fileName = $('<span>').text(file.name);
+                                listItem.append(fileName);
+
+                                // Add an image to the list item
+                                var fileImage = $('<img>').attr('src', "http://localhost/image-drive/dashboard" + file.image_url).addClass('float-right');
+                                listItem.append(fileImage);
+
+                                // Add the list item to the assigned files list
+                                assignedFilesList.append(listItem);
+                            });
+
+                            // Show the modal
+                            assignedFilesModal.modal('show');
+                        });
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log('Error:', errorThrown);
+                    }
+                });
+            });
+
+            // Handle click event on assign button
+            $(document).on('click', '.btn-assign', function() {
+                // Retrieve the list of teams for the selected project
+                var projectId = $(this).attr('id');
+
+                $.ajax({
+                    url: "getTeamsAndDeliverables.php?id=" + projectId,
+                    success: function(data) {
+                        // Get a reference to the select element
+                        var $select = $("#assignTeamList");
+                        console.log(data.teams);
+                        $select.empty();
+                        // Loop through the list of teams and create an option element for each team
+                        $.each(data.teams, function(index, team) {
+                            var $option = $("<option>").val(team.team_id).text(team.team_name);
+                            $select.append($option);
+                        });
+                    }
+                });
+
+
+            });
+
         });
     </script>
 
