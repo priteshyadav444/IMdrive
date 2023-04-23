@@ -57,85 +57,76 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label>Assign to:</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="assignType" id="assignToTeam" checked>
-                        <label class="form-check-label" for="assignToTeam">Team</label>
+                <form method="POST">
+                    <div class="form-group">
+                        <label>Assign to:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="assignType" id="assignToTeam" value="team" checked>
+                            <label class="form-check-label" for="assignToTeam">Team</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="assignType" id="assignToMember" value="member">
+                            <label class="form-check-label" for="assignToMember">Team Member</label>
+                        </div>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="assignType" id="assignToMember">
-                        <label class="form-check-label" for="assignToMember">Team Member</label>
+
+                    <div class="form-group">
+                        <label>Select Team:</label>
+                        <select id="assignTeamList" class="form-control" name="team">
+                        </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>Select Team:</label>
-                    <select id="assignTeamList" class="form-control">
-                        <option value="null" selected>Select Team</option>
+                    <div class="form-group">
+                        <label>Select Team Member:</label>
+                        <select id="memberList" class="form-control" multiple name="member">
+                        </select>
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="fileAssignType" id="assignAllFiles" checked>
+                        <label class="form-check-label" for="assignAllFiles">Assign All Files</label>
+                    </div>
+
+                    <div class="form-group" id="assignDeliverablesSection">
+                        <label>Select Deliverable:</label>
+                        <select id="assignDeliverables" class="form-control" name="deliverable">
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Search Files:</label>
+                        <input type="text" class="form-control" id="assignSearchFiles" placeholder="Enter search term...">
+                    </div>
+
+                    <label>Select Files:</label>
+                    <select id="assignFilesList" class="form-control" multiple name="file">
 
                     </select>
-                </div>
 
-                <div class="form-group">
-                    <label>Select Team Member:</label>
-                    <select id="assignList" class="form-control" multiple>
-                        <option>Member A</option>
-                        <option>Member B</option>
-                        <option>Member C</option>
-                    </select>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="assignAllFiles" id="assignAllFiles" checked>
-                    <label class="form-check-label" for="assignAllFiles">Assign All Files</label>
-                </div>
-                <div class="form-group">
-                    <label>Select Deliverable:</label>
-                    <select id="assignDeliverables" class="form-control">
-                        <option>Deliverable A</option>
-                        <option>Deliverable B</option>
-                        <option>Deliverable C</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" id="addFileBtn">Assign Files </button>
+                    </div>
 
-                <div class="form-group">
-                    <label>Search Files:</label>
-                    <input type="text" class="form-control" id="assignSearchFiles" placeholder="Enter search term...">
-                </div>
+                    <!-- Add Task Button -->
+                    <div class="form-group">
+                        <label for="taskType">Task Type </label>
+                        <select id="taskList" class="form-control" id="taskType" placeholder="Enter Task Type" name="task">
 
-                <label>Select Files:</label>
-                <select id="assignFiles" class="form-control" multiple>
-                    <option>File A</option>
-                    <option>File B</option>
-                    <option>File C</option>
-                </select>
-
-                <div class="form-group">
-                    <button type="button" class="btn btn-primary" id="addFileBtn">Add File</button>
-                </div>
-
-                <!-- Add Task Button -->
-                <div class="form-group">
-                    <label for="taskType">Task Type*</label>
-                    <select id="assignList" class="form-control" id="taskType" placeholder="Enter Task Type">
-                        <option>Task A</option>
-                        <option>Task B</option>
-                        <option>Task C</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="taskDescription">Task Description*</label>
-                    <textarea class="form-control" id="taskDescription" rows="3" placeholder="Enter Task Description"></textarea>
-                </div>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#assignModalTask">
-                    <i class="glyphicon glyphicon-plus"></i> Add Task
-                </button>
-
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Task Description*</label>
+                        <textarea class="form-control" id="taskDescription" rows="3" placeholder="Enter Task Description" name="taskDescription"></textarea>
+                    </div>
+                    <button  type="submit" class="btn btn-primary" data-toggle="modal" data-target="#assignModalTask">
+                        <i class="glyphicon glyphicon-plus"></i> Asign File With Task
+                    </button>
+                </form>
             </div>
             <!-- Assign Modal  Footer -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="assignBtn">Assign</button>
+                <!-- <button type="button" class="btn btn-primary" id="assignBtn">Assign</button> -->
             </div>
         </div>
 

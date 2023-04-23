@@ -114,8 +114,6 @@ require_once '../shared/check-login.php';
         </td>
 
         <td style="display:' . $data['is_edit_visible'] . ';"><button class="btn btn-primary btn-assign" data-toggle="modal" data-target="#assignModal" id=' . $data["project_id"] . ' ><i class="glyphicon glyphicon-plus"></i></button></td>
-
-
     </tr>';
     }
 
@@ -238,6 +236,7 @@ require_once '../shared/check-login.php';
 
     <script type="text/javascript">
         $(document).ready(function() {
+            var activeProject;
             $('input[type="checkbox"][name^="archive"]').on("change", function() {
                 var Archive = $(this).is(":checked");
 
@@ -316,11 +315,6 @@ require_once '../shared/check-login.php';
                     }
                 });
             });
-
-
-
-
-
 
             $(document).on('click', '.btn-link', function() {
                 var projectId = $(this).attr('id');
@@ -415,25 +409,186 @@ require_once '../shared/check-login.php';
             $(document).on('click', '.btn-assign', function() {
                 // Retrieve the list of teams for the selected project
                 var projectId = $(this).attr('id');
+                activeProject = projectId;
+                var $select = $("#taskList");
+                $select.empty();
+
+                $select = $("#assignTeamList");
+                $select.empty();
+
+                $select = $("#memberList");
+                $select.empty();
+
+                $select = $("#assignDeliverables");
+                $select.empty();
+
+                $select = $("#assignFiles");
+                $select.empty();
 
                 $.ajax({
                     url: "getTeamsAndDeliverables.php?id=" + projectId,
                     success: function(data) {
                         // Get a reference to the select element
                         var $select = $("#assignTeamList");
-                        console.log(data.teams);
                         $select.empty();
+                        var $option = $("<option selected disabled>").val("none").text("Select Team");
+                        $select.append($option);
                         // Loop through the list of teams and create an option element for each team
                         $.each(data.teams, function(index, team) {
                             var $option = $("<option>").val(team.team_id).text(team.team_name);
                             $select.append($option);
                         });
+
+
+
+                        $select = $("#taskList");
+                        $select.empty();
+
+                        $option = $("<option selected disabled>").val("none").text("Select Task");
+                        $select.append($option);
+
+                        $.each(data.tasks, function(index, task) {
+                            var $option = $("<option>").val(task.task_type_id).text(task.task_type_name);
+                            $select.append($option);
+                        });
+                    }
+                });
+            });
+
+
+            $(document).on('change', '#assignTeamList', function() {
+                var teamId = $(this).val();
+                if (teamId !== "none") {
+                    $.ajax({
+                        url: "getMembers.php?id=" + teamId,
+                        success: function(data) {
+                            var $select = $("#memberList");
+                            $select.empty();
+                            var $option = $("<option selected disbaled>").val("none").text("Select Member");
+                            $select.append($option);
+                            $.each(data.members, function(index, member) {
+                                var $option = $("<option>").val(member.user_id).text(member.name);
+                                $select.append($option);
+                            });
+                        }
+                    });
+                } else {
+                    $("#memberList").empty();
+                }
+            });
+
+
+            $('#assignDeliverables').hide();
+            $('#assignDeliverablesSection').hide();
+
+            // Check if the assignAllFiles checkbox is selected by default
+            if ($('#assignAllFiles').is(':checked')) {
+
+                // Hide the deliverables select element
+                $('#assignDeliverablesSection').hide();
+                $('#assignDeliverables').hide();
+            } else {
+                // Show the deliverables select element
+                var projectId = $('.btn-assign').attr('id');
+                $('#assignDeliverablesSection').show();
+                $('#assignDeliverables').show();
+                $.ajax({
+                    url: "getTeamsAndDeliverables.php?id=" + activeProject,
+                    success: function(data) {
+                        // Get a reference to the select element
+                        $select = $("#assignDeliverables");
+                        $select.empty();
+                        $option = $("<option disbaled>").val("none").text("Select Deliverables");
+                        $select.append($option);
+                        $.each(data.deliverables, function(index, deliverable) {
+                            var $option = $("<option>").val(deliverable.project_deliverable_id).text(deliverable.deliverable_name);
+                            $select.append($option);
+                        });
                     }
                 });
 
+            }
 
+            // Handle the change event of the assignAllFiles checkbox
+            $('#assignAllFiles').change(function() {
+                var projectId = $('.btn-assign').attr('id');
+
+                if ($(this).is(':checked')) {
+                    // Hide the deliverables select element
+                    $('#assignDeliverablesSection').hide();
+                    $('#assignDeliverables').hide();
+                } else {
+                    // Show the deliverables select element
+                    $('#assignDeliverablesSection').show();
+                    $('#assignDeliverables').show();
+
+                    $.ajax({
+                        url: "getTeamsAndDeliverables.php?id=" + activeProject,
+                        success: function(data) {
+                            // Get a reference to the select element
+                            $select = $("#assignDeliverables");
+                            $select.empty();
+                            $option = $("<option disbaled>").val("none").text("Select Deliverables");
+                            $select.append($option);
+                            $.each(data.deliverables, function(index, deliverable) {
+                                var $option = $("<option>").val(deliverable.project_deliverable_id).text(deliverable.deliverable_name);
+                                $select.append($option);
+                            });
+                        }
+                    });
+
+
+                }
             });
 
+
+
+            $(document).on('change', '#assignDeliverables', function() {
+                var deliverableId = $(this).val();
+                console.log(deliverableId)
+                if (deliverableId !== "none") {
+                    $.ajax({
+                        url: "getFiles.php?id=" + deliverableId,
+                        success: function(data) {
+                            $select = $("#assignFilesList");
+                            $select.empty();
+                            $option = $("<option disbaled>").val("none").text("Select Files");
+                            $select.append($option);
+                            $.each(data.files, function(index, file) {
+                                var $option = $("<option>").val(file.file_id).text(file.name);
+                                $select.append($option);
+                            });
+                        }
+                    });
+                } else {
+                    $("#assignDeliverables").empty();
+                }
+            });
+
+
+
+            $("form").submit(function(event) {
+                // Stop form from submitting normally
+                event.preventDefault();
+
+                // Get form data
+                var formData = $(this).serialize();
+
+                // Send the form data using AJAX
+                $.ajax({
+                    type: "POST",
+                    url: "/assignFile",
+                    data: formData,
+                    success: function(data) {
+                        // Handle success case
+                        console.log(data);
+                    },
+                    error: function(xhr, status, error) {
+                        var errorMessage = xhr.status + ': ' + xhr.statusText
+                        console.log(errorMessage);
+                    }
+                });
+            });
         });
     </script>
 
