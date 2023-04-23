@@ -254,6 +254,34 @@ class User
         return false;
     }
 
+    public function getAllDelverableListForModel($projectId)
+    {
+        $userId = $this->sessionManagment->getUserId();
+        if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_DELIVERABLE) != false) {
+            try {
+
+                $sqlQuery = "SELECT `pd`.`project_deliverable_id` As `project_deliverable_id`, `dl`.`deliverable_name`
+                from `project_deliverables` as `pd`, `deliverables` as `dl`
+                WHERE `pd`.`project_id`= ? AND 
+                `pd`.`deliverable_id` = `dl`.`deliverable_id`
+                
+                ";
+                $stmt = $this->connection->prepare($sqlQuery);
+                $stmt->bindValue(1, $projectId);
+
+                $stmt->execute();
+                $result = array();
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    array_push($result, $row);
+                }
+                return $result;
+            } catch (PDOException $e) {
+                die($e->getMessage());
+            }
+        }
+        return false;
+    }
+
     public function updateDeliverable($deliverableName, $deliverableId)
     {
         $userId = $this->sessionManagment->getUserId();
@@ -986,7 +1014,7 @@ class User
         $userId = $this->sessionManagment->getUserId();
 
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::VIEW_USER) != false) {
-            $query = "SELECT u.*, t.team_name
+            $query = "SELECT u.user_id, CONCAT(u.first_name, ' ', u.last_name) as name, t.team_name
               FROM team_members tm
               INNER JOIN users u ON tm.user_id = u.user_id
               INNER JOIN teams t ON tm.team_id = t.team_id
