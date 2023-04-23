@@ -1123,6 +1123,24 @@ class User
         return $users;
     }
 
+    public function getFilesOfDeliverable($deliverableId)
+    {
+        $userIdViewer = $this->sessionManagment->getUserId();
+        $userRole = $this->getUserRole($userIdViewer);
+
+        if ($this->checkPrivilages($userRole, Privilege::VIEW_FILES) != false) {
+            $sqlQuery = "SELECT iv.* FROM files f
+               JOIN image_varients iv ON f.file_id = iv.file_id
+               WHERE f.project_deliverable_id = :deliverable_id
+               AND f.file_type = 1";
+            $stmt = $this->connection->prepare($sqlQuery);
+            $stmt->bindParam("deliverable_id", $deliverableId);
+            $stmt->execute();
+            $userDetails = $stmt->fetchAll();
+            return $userDetails;
+        }
+    }
+
 
 
 
