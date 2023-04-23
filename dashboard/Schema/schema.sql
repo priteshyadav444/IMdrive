@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 21, 2023 at 06:26 PM
--- Server version: 10.4.27-MariaDB-log
--- PHP Version: 8.1.12
+-- Generation Time: Apr 23, 2023 at 08:34 PM
+-- Server version: 10.4.27-MariaDB
+-- PHP Version: 8.0.25
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -103,7 +103,9 @@ CREATE TABLE `deliverable_members` (
 --
 
 INSERT INTO `deliverable_members` (`user_id`, `project_deliverable_id`, `project_file_assigned_type_id`, `created_at`) VALUES
-(8, 6, 1, '2023-04-21 12:34:02');
+(8, 6, 1, '2023-04-21 12:34:02'),
+(9, 16, 1, '2023-04-22 07:59:37'),
+(10, 17, 1, '2023-04-22 07:59:37');
 
 -- --------------------------------------------------------
 
@@ -350,8 +352,8 @@ CREATE TABLE `project_status` (
 --
 
 INSERT INTO `project_status` (`project_status_id`, `project_status_type_name`) VALUES
-(1, 'actice'),
-(2, 'inactice');
+(1, 'active'),
+(2, 'inactive');
 
 -- --------------------------------------------------------
 
