@@ -479,7 +479,7 @@ class User
 
                     $sqlQuery = $sqlQuery . $values;
 
-                    var_dump($sqlQuery);
+                    // var_dump($sqlQuery);
                     // preparing query for deliverable
                     $stmt = $this->connection->prepare($sqlQuery);
 
@@ -708,11 +708,16 @@ class User
         return false;
     }
 
-    private function isMemberOfDeliverable($deliverableId)
+    private function isMemberOfDeliverable($deliverableId, $member = null)
     {
         $userId = $this->sessionManagment->getUserId();
+
+        if ($member != null) {
+            $userId = $member;
+        }
+
         if ($this->checkPrivilages($this->getUserRole($userId), Privilege::UPDATE_PROJECT) != false) {
-            $stmt = $this->connection->prepare("SELECT COUNT(*) FROM deliverable_members WHERE deliverable_id = ? AND user_id = ?");
+            $stmt = $this->connection->prepare("SELECT COUNT(*) FROM deliverable_members WHERE project_deliverable_id = ? AND user_id = ?");
             $stmt->bindValue(1, $deliverableId);
             $stmt->bindValue(2, $userId);
             $stmt->execute();
@@ -1041,6 +1046,7 @@ class User
             FROM deliverable_members JOIN project_deliverables
             ON project_deliverables.project_deliverable_id = deliverable_members.project_deliverable_id
             WHERE deliverable_members.user_id =  :userId  AND project_deliverables.project_id = :project_id";
+
             $stmt = $this->connection->prepare($query);
             $stmt->execute(['userId' => $userId, 'project_id' => $projectId]);
 
@@ -1051,7 +1057,6 @@ class User
             foreach ($deliverables as $deliverable) {
                 // Check fileAssignedType for deliverable
                 $fileAssignedType = $deliverable['project_file_assigned_type_id'];
-
                 if ($fileAssignedType == 1) {
                     // Fetch all files for the deliverable from files table
                     $query = "SELECT image_varients.* FROM files 
@@ -1066,7 +1071,7 @@ class User
                     $files = array_merge($files, $deliverableFiles);
                 } elseif ($fileAssignedType == 2) {
                     // Fetch files for the deliverable from deliverable_member_files table
-                    $query = "SELECT files.* FROM deliverable_member_files 
+                    $query = "SELECT image_varients.* FROM deliverable_member_files 
                     INNER JOIN files ON deliverable_member_files.file_id = files.file_id 
                     JOIN image_varients ON image_varients.file_id = files.file_id
                     WHERE deliverable_member_files.user_id = :userId
@@ -1093,7 +1098,7 @@ class User
         $userRole = $this->getUserRole($userIdViewer);
 
         if ($this->checkPrivilages($userRole, Privilege::VIEW_DRIVE) != false) {
-            $query = "SELECT `dm`.`user_id`, CONCAT(`us`.`first_name`, ' ', `us`.`last_name` ) AS `name`
+            $query = "SELECT DISTINCT(`dm`.`user_id`), CONCAT(`us`.`first_name`, ' ', `us`.`last_name` ) AS `name`
             FROM `project_deliverables` AS  `pd` 
             JOIN `deliverable_members`  AS `dm`
             ON  `pd`.`project_deliverable_id` = `dm`.`project_deliverable_id`
@@ -1138,6 +1143,137 @@ class User
             $stmt->execute();
             $userDetails = $stmt->fetchAll();
             return $userDetails;
+        }
+    }
+
+    public function assignToTeam($data)
+    {
+        $userIdViewer = $this->sessionManagment->getUserId();
+        $userRole = $this->getUserRole($userIdViewer);
+        if ($this->checkPrivilages($userRole, Privilege::UPDATE_PROJECT) != false) {
+            try {
+                $this->connection->beginTransaction();
+                // assign type to team
+
+                $projectId = $data['projectId'];
+                $description = $data['taskDescription'];
+                $taskId = false;
+                $assignType = false;
+
+                if (isset($data['assignType'])) {
+                    $assignType = $data['assignType'];
+                }
+
+                if (isset($data['task'])) {
+                    $taskId = $data['task'];
+                }
+
+                if ($assignType) {
+                    $teamMembers = array();
+                    if ($assignType == 'team') {
+                        // geting all team members
+                        $teamMembers = $this->getTeamMembersByTeamId($data['team']);
+                    } else if ($assignType == 'member' && isset($data['member'])) {
+                        foreach ($data['member'] as $values) {
+                            $member['user_id'] = $values;
+                            array_push($teamMembers, $member);
+                        }
+                    } else {
+                        return false;
+                    }
+
+                    if (isset($data['fileAssignType']) && $data['fileAssignType'] == "on") {
+                        // if assign type is all than inserting into each deliveable member type one
+                        $sqlQueryDeliverableMember = "INSERT INTO 
+                        `deliverable_members`(`user_id`, `project_deliverable_id`, `project_file_assigned_type_id`) 
+                         VALUES (:userId,:projectdeliverableId,:assignType)";
+
+                        $stmt = $this->connection->prepare($sqlQueryDeliverableMember);
+                        // geting all delivreables
+                        $allDeliverables = $this->getAllDelverableListForModel($projectId);
+
+
+                        foreach ($teamMembers as $member) {
+                            foreach ($allDeliverables as $deliverable) {
+                                $stmt->bindValue(':userId', $member['user_id']);
+                                $stmt->bindValue(':projectdeliverableId', $deliverable['project_deliverable_id']);
+                                $fileAssignedType = 1;
+                                $stmt->bindValue(':assignType', $fileAssignedType);
+                                $stmt->execute();
+                            }
+                            if (isset($data['task'])) {
+                                $taskInsertQuery = "INSERT INTO
+                                 `project_tasks`(`task_id`, `description`, `task_created_for`,  `project_id`) 
+                                VALUES (:taskTypeId, :description, :taskCreatedForId, :projectId)";
+
+                                $stmtInsert = $this->connection->prepare($taskInsertQuery);
+
+                                $stmtInsert->bindValue(':taskTypeId',  $taskId);
+                                $stmtInsert->bindValue(':description', $description);
+                                $stmtInsert->bindValue(':taskCreatedForId', $member['user_id']);
+                                $stmtInsert->bindValue(':projectId', $projectId);
+
+                                $stmtInsert->execute();
+                            }
+                        }
+                    } else {
+                        $sqlQueryDeliverableMember = "INSERT INTO 
+                        `deliverable_members`(`user_id`, `project_deliverable_id`, `project_file_assigned_type_id`) 
+                         VALUES (:userId,:projectdeliverableId,:assignType)";
+
+                        $stmt = $this->connection->prepare($sqlQueryDeliverableMember);
+                        var_dump($teamMembers);
+
+                        foreach ($teamMembers as $member) {
+                            // if assign type is particular deliverable 
+
+                            $isUserAlreadyAvailabe = $this->isMemberOfDeliverable($data['deliverable'], $member['user_id']);
+                            if (!$isUserAlreadyAvailabe) {
+                                $stmt->bindValue(':userId', $member['user_id']);
+                                $stmt->bindValue(':projectdeliverableId', $data['deliverable']);
+                                $fileAssignedType = 2;
+                                $stmt->bindValue(':assignType', $fileAssignedType);
+                                $stmt->execute();
+                            }
+
+                            $fileInsertQuery = "INSERT INTO `deliverable_member_files`(`user_id`, `file_id`, `project_deliverable_id`) VALUES (:userId,:fileId,:projectDeliverableId)";
+                            $stmt1 = $this->connection->prepare($fileInsertQuery);
+                            $files = $data["file"];
+                            $deliverableId = $_POST['deliverable'];
+
+                            foreach ($files as $fileId) {
+                                $stmt1->bindValue(':userId', $member['user_id']);
+                                $stmt1->bindValue(':fileId', $fileId);
+                                $stmt1->bindValue(':projectDeliverableId', $deliverableId);
+                                $stmt1->execute();
+                            }
+
+
+                            if (isset($_POST['task'])) {
+                                $taskInsertQuery = "INSERT INTO
+                                 `project_tasks`(`task_id`, `description`, `task_created_for`,  `project_id`) 
+                                VALUES (:taskTypeId, :description, :taskCreatedForId, :projectId)";
+
+                                $stmtInsert = $this->connection->prepare($taskInsertQuery);
+
+                                $stmtInsert->bindValue(':taskTypeId',  $taskId);
+                                $stmtInsert->bindValue(':description', $description);
+                                $stmtInsert->bindValue(':taskCreatedForId', $member['user_id']);
+                                $stmtInsert->bindValue(':projectId', $projectId);
+
+                                $stmtInsert->execute();
+                            }
+                        }
+                    }
+                }
+                $this->connection->commit();
+                return true;
+            } catch (PDOException $e) {
+                // Roll back transaction on error
+                $this->connection->rollBack();
+                throw $e;
+                return false;
+            }
         }
     }
 
