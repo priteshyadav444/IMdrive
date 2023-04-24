@@ -1,6 +1,11 @@
 <?php
 @session_start();
 require_once '../shared/check-login.php';
+require_once '../Config/SessionConfig.php';
+require_once '../Config/Privilege.php';
+require_once "../library/validation/vendor/autoload.php";
+require_once "../database/Connection.php";
+require_once "../database/User.php";
 ?>
 
 <!doctype html>
@@ -38,7 +43,7 @@ require_once '../shared/check-login.php';
     ?>
     <?php
     $hasPermissionToCreateTaskLog = false;
-
+    $hasPermissionToViewUser = false;
 
     if (isset($_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK_LOG]) && $_SESSION[SessionConfig::PRIVILAGS][Privilege::VIEW_TASK_LOG]) {
         $hasPermissionToViewTaskLog = true;
@@ -47,6 +52,7 @@ require_once '../shared/check-login.php';
     if (!$hasPermissionToViewUser) {
         $connection = new Connection();
         $user = new User($connection->getConnection());
+        $result = array();
         // $result = $user->getTaskLog();
 
         $row = "";
