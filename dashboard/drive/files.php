@@ -105,7 +105,9 @@ if (!$deliverableId) {
                     <li>Dimensions:' . $data["width"] . ' x ' . $data["height"] . 'px</li>
                 </ul>
             </td>
-            <td><button class="btn btn-success btn-sm">Download</button></td>
+            <td>
+                    <a  class="btn btn-success btn-sm"  href="..' . $data["image_url"] . '" download>Download</a>
+            </td>
             ';
 
 

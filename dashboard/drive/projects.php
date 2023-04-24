@@ -388,7 +388,7 @@ require_once '../shared/check-login.php';
                                 listItem.append(fileName);
 
                                 // Add an image to the list item
-                                var fileImage = $('<img>').attr('src', "http://localhost/image-drive/dashboard" + file.image_url).addClass('float-right');
+                                var fileImage = $('<img>').attr('src', "http://localhost/programs/imagedrive/dashboard" + file.image_url).addClass('float-right');
                                 listItem.append(fileImage);
 
                                 // Add the list item to the assigned files list
@@ -573,11 +573,12 @@ require_once '../shared/check-login.php';
 
                 // Get form data
                 var formData = $(this).serialize();
+                formData += "&projectId=" + activeProject;
 
                 // Send the form data using AJAX
                 $.ajax({
                     type: "POST",
-                    url: "/assignFile",
+                    url: "assignFile.php",
                     data: formData,
                     success: function(data) {
                         // Handle success case
