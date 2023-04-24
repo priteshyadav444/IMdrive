@@ -10,10 +10,7 @@
                     <div class="col-md-12">
                         <h5>Assigned Members:</h5>
                         <ul class="list-group">
-
                         </ul>
-
-
                     </div>
                 </div>
             </div>
@@ -72,13 +69,13 @@
 
                     <div class="form-group">
                         <label>Select Team:</label>
-                        <select id="assignTeamList" class="form-control" name="team">
+                        <select id="assignTeamList" class="form-control" name="team" required>
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Select Team Member:</label>
-                        <select id="memberList" class="form-control" multiple name="member">
+                        <select id="memberList" class="form-control" multiple name="member[]">
                         </select>
                     </div>
 
@@ -99,7 +96,7 @@
                     </div>
 
                     <label>Select Files:</label>
-                    <select id="assignFilesList" class="form-control" multiple name="file">
+                    <select id="assignFilesList" class="form-control" multiple name="file[]">
 
                     </select>
 
@@ -118,7 +115,7 @@
                         <label for="taskDescription">Task Description*</label>
                         <textarea class="form-control" id="taskDescription" rows="3" placeholder="Enter Task Description" name="taskDescription"></textarea>
                     </div>
-                    <button  type="submit" class="btn btn-primary" data-toggle="modal" data-target="#assignModalTask">
+                    <button type="submit" class="btn btn-primary" data-toggle="modal" data-target="#assignModalTask">
                         <i class="glyphicon glyphicon-plus"></i> Asign File With Task
                     </button>
                 </form>
