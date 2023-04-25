@@ -1,0 +1,165 @@
+Features : 
+1) Validation.
+2) Error handling.
+3) Response with Error Message .
+4) Email Validation.
+5) Default Senitization
+	htmlspecialchar
+	triming
+	Remove slases
+
+Test Cases for Each Validation Type:
+
+1) Required:
+
+- Empty input
+- Input with a value
+
+2)Numeric:
+
+- Empty input
+- Input as string
+- Input with special characters
+- Alphanumeric input
+- Input as a number
+
+3)Decimal:
+
+- Empty input
+- Input as string
+- Input with special characters
+- Alphanumeric input
+- Input as a decimal number (12.00)
+
+4)String:
+
+- Empty input
+- Input as a number
+- Input with special characters
+- Alphanumeric input
+- Input as a string
+- Input as full name
+
+5)Email:
+
+- Empty input
+- Input as a number
+- Input as a string
+- Alphanumeric input
+- Valid email input
+
+6)Minimum:
+
+- Input less than the minimum value
+- Input equal to the minimum value
+- Input as a negative value
+- Input greater than the minimum value
+- Input as the minimum value
+7)Maximum:
+
+- Input less than the maximum value
+- Input equal to the maximum value
+- Input as a negative value
+- Input greater than the maximum value
+- Input as the maximum value
+
+8)Password:
+
+- Invalid format input
+- Valid format input
+
+9)Confirm Password:
+
+- Mismatch with the password input
+- Pincode:
+- Input as a string
+- Numeric input with less than 6 characters
+- Numeric input with more than 6 characters
+- Non-existent pincode input
+- Existing pincode input
+10)File Upload:
+
+Validation Types Supported:
+
+Required
+- Maximum file size (max:12)
+- File type (filetype:pdf)
+Currently Supported File Types:
+
+"jpg" => "image/jpeg"
+"jpeg" => "image/jpeg"
+"json" => "application/json"
+"png" => "image/png"
+"pdf" => "application/pdf"
+"txt" => "text/plain"
+"zip" => "application/zip"
+Default => "application/octet-stream"
+Note: If Confirm Password is processed prior to Password, the keys will be considered as Password.
+
+
+
+
+
+Adding Features Steps: 
+	`
+1) Make Validation method in Validate Class that return a boolean Value Ex. public function checkEmail():bool (class : Validate).
+2) Map validation value to validationType in match Method getValidationType Ex. ('email' => CHECK_EMAIL)(class : FormValidation).
+3) Map a $validationType  to errorCode in getErrorMessage(). Ex('CHECK_EMAIL' => 'INVALID_DATATYPE_KEY'). (class : FormValidation)
+4) Map a $errorCode to Error Message in $errorHandler Ex('INVALID_DATATYPE_KEY' => 'Invalid Data types'). (class : FormValidation).
+
+5) Add contional statement for $validationType in performValidation. 
+	Perform a validation using Validate Class method on Error 
+	Call a setError method and pass a error message using getErrorMethod by pass argument $validationType and other argument.
+
+
+Steps to Add Features in a Form Validation Class:
+
+1) Create a validation method in the Validate Class that returns a boolean value. For example: public function checkEmail():bool in the Validate class.
+
+2) Map the validation value to the validation type in the match function inside getValidationType() in the FormValidation Class. For example, 'email' => CHECK_EMAIL.
+
+3) Map the $validationType to an error code in the getErrorMessage() method in the FormValidation class. For example, 'CHECK_EMAIL' => 'INVALID_DATATYPE_KEY'.
+
+4) Map the $errorCode to an error message in the $errorHandler property in the FormValidation class.. For example, 'INVALID_DATATYPE_KEY' => 'Invalid Data types'.
+
+5) Add a conditional statement for $validationType in the performValidation() method. 
+	- If the validation fails, use the Validate Class method to perform the validation, call the setError() method, and 
+	- Pass the error message using the getErrorMessage() method by passing the $validationType and other arguments.
+
+Todo : 
+Warning on invalid validation input or 
+optimise code For console as well as WEB
+
+
+Assumtion : 
+- In the form, only one password field will be treated as the password, with the first field encountered being considered as the password and the second as the confirmation password, regardless of their original label. 
+- All duplicated validations for the same Key field have been removed.
+
+
+Example Program :
+<?php
+
+include_once './../../validation/validators/FormValidator.php';
+
+use Form\FormValidator as FormValidator;
+
+$obj = new FormValidator();
+
+if (isset($_POST['submit'])) {
+    $validations = [
+        'name' => 'string',
+        'email' => 'email',
+        'phone' => 'numeric|min:10|max:10',
+    ];
+    var_dump($obj->validate($_POST, $validations)->isError());
+}
+?>
+
+<?php
+        if ($obj->isError() != false) {
+            foreach ($obj->all() as $error)
+                echo "<li>$error</li>";
+        } else {
+            echo 'All Field are Valid';
+        }
+?>

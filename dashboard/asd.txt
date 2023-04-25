@@ -1,0 +1,313 @@
+Side Bar
+	- Only Show Allowed Links
+	- Only Access Allowed Pages
+	- Can perform only allowed Action.
+
+Insert into permission ( default values )
+
+User Login 
+	Data Sentization.
+	Query using PDO.
+
+
+Set Login 
+Set Roles And Permission
+
+- Where to Show Tasks for user. ( Dashboard is Only Visiable to Admin)
+
+
+- How to Upload
+- Task Deliverable
+
+
+- If Deliverable Assiging. tha First Show Project
+
+
+Commit All changs with (SQL)
+
+User can Have SIngle Team
+
+Fetch those task that are active
+
+add extra table for deliver_members_files table below added
+
+
+
+
+
+deliver_members
+
+delierverable
+
+deliject_project
+
+
+deliverable_name
+deliverable_id
+
+userid
+projectid
+
+
+
+
+
+
+
+SELECT
+role_permission.permission_id,
+permissions.name,
+role_permission.permission_value
+FROM `user_role`
+JOIN `role_permission`
+  ON `user_role`.`role_id` = `role_permission`.`role_id` 
+JOIN `permissions`
+  ON `permissions`.`permission_id` = `role_permission`.`permission_id`
+AND `user_role`.`id` = 1.
+
+
+// project feteching for particular user.
+SELECT 
+                `project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
+                (SELECT GROUP_CONCAT(`deliverable_name`) 
+                 FROM `deliverables` as `dl` JOIN `project_deliverables` As `pd` 
+                 ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
+                 JOIN `deliverable_members` As `dm` 
+                  ON `dl`.`deliverable_id`=`dm`.`deliverable_id` 
+                 WHERE `pd`.`project_id` = `pj`.`project_id` AND `dm`.`user_id` = 1
+                 GROUP BY `pd`.`project_id` )
+                 as `deliverables`,
+                (SELECT count(*) FROM `project_members` as `pm` WHERE `pm`.`project_id` = `pj`.`project_id`) as `member_count` 
+                 FROM `projects` as `pj` WHERE `pj`.`is_archive` = 0 GROUP By `pj`.`project_id`
+
+
+
+
+Update Via Edit Button and create name
+Validation must be same.
+
+
+
+single query data fetch projets
+	description
+	deliverable list
+	assine count
+	assigne lits
+	archive
+
+status
+	active/inactive
+
+
+because mam. view can be common for admin/users. 
+so for each view even for single edit button, 
+listing of any enity first we have to check privilege's of user/admin than show that particular view. 
+and privilege's can be updated also.
+and same goes for backend we have check at backend side also does user have privilage for any action.
+
+our template is ready, schema is ready. 
+
+
+
+
+SELECT 
+`project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
+(SELECT GROUP_CONCAT(`deliverable_name`) 
+ FROM `deliverables` as `dl` JOIN `project_deliverables` As `pd` 
+ ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
+ WHERE `pd`.`project_id` = `pj`.`project_id` 
+ GROUP BY `pd`.`project_id` )
+ as `deliverables`,
+ (SELECT count(*) FROM `project_members` AS `pm` WHERE `pm`.`project_id ` = `pj`.`project_id`) as `member_count`
+ FROM `projects` as `pj` GROUP By `pj`.`project_id`; 
+
+
+GROUP By `pj`.`project_id`
+
+
+
+SELECT * from `project_deliverables` as `pd`, `deliverables` as `dl`, `deliverable_members` as `pm` 
+WHERE `pd`.`project_id`=52 AND 
+`pd`.`deliverable_id` = `dl`.`deliverable_id` 
+AND `dl`.`deliverable_id` = `pm`.`deliverable_id`;
+
+
+SELECT `dl`.`deliverable_id`, `dl`.`deliverable_name` from `project_deliverables` as `pd`, `deliverables` as `dl`, `deliverable_members` as `pm` 
+WHERE `pd`.`project_id`=52 AND 
+`pd`.`deliverable_id` = `dl`.`deliverable_id` AND 
+`dl`.`deliverable_id` = `pm`.`deliverable_id`
+;
+
+
+Update Description as alha numeric . 
+Insert one extra attribut in images image type main,varient
+
+
+
+
+
+
+// deliverable releted tables
+
+CREATE TABLE `deliverables` (
+  `deliverable_id` int(10) UNSIGNED NOT NULL,
+  `deliverable_name` varchar(60) NOT NULL,
+  `created_by_admin_id` int(10) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+ 
+CREATE TABLE `deliverable_members` (
+  `deliverable_id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `deliverable_members`
+  ADD KEY `deliverable_id` (`deliverable_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `project_file_assigned_type_id` (`project_file_assigned_type_id`);
+
+ALTER TABLE `deliverable_members`
+  ADD CONSTRAINT `deliverable_members_ibfk_1` FOREIGN KEY (`deliverable_id`) REFERENCES `deliverables` (`deliverable_id`),
+  ADD CONSTRAINT `deliverable_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `deliverable_members_ibfk_3` FOREIGN KEY (`project_file_assigned_type_id`) REFERENCES `project_file_assigned_types` (`project_file_assigned_type_id`);
+
+
+CREATE TABLE `project_file_assigned_types` (
+  `project_file_assigned_type_id` tinyint(3) UNSIGNED NOT NULL,
+  `name` varchar(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+`project_file_assigned_type_id` 
+CONATON TWO TYPES 
+
+	1) ALL
+	2) CUSTOM
+
+
+ALTER TABLE `project_file_assigned_types`
+  ADD PRIMARY KEY (`project_file_assigned_type_id`);
+
+CREATE TABLE `files` (
+  `file_id` int(10) UNSIGNED NOT NULL,
+  `deliverable_id` int(10) UNSIGNED NOT NULL,
+  `uploaded_by_user_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `image_varients` (
+  `file_id` int(10) UNSIGNED NOT NULL,
+  `image_url` varchar(100) NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `size` varchar(30) NOT NULL,
+  `width` varchar(20) NOT NULL,
+  `height` varchar(20) NOT NULL,
+  `thumbnail_url` varchar(100) NOT NULL,
+  `folder_id` int(10) UNSIGNED NOT,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `image_varients`
+  ADD KEY `file_id` (`file_id`),
+  ADD KEY `folder_id` (`folder_id`);
+
+
+CREATE TABLE `deliverable_member_files` (
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `file_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+ALTER TABLE `deliverable_member_files`
+  ADD CONSTRAINT `project_member_files_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`),
+  ADD CONSTRAINT `project_member_files_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`file_id`);
+
+
+// mian image listing
+
+SELECT iv.*, (SELECT count(*) FROM `files_varient` where `files_varient`.`main_file_id` = `iv`.`file_id` ) `no_of_varient`
+            FROM `deliverable_members` `dm`
+            JOIN `files` `f` ON f.deliverable_id = dm.deliverable_id
+            JOIN `image_varients` `iv` ON iv.file_id = f.file_id
+            WHERE dm.deliverable_id = 3
+            AND dm.project_file_assigned_type_id = 1
+            AND dm.user_id = 1
+            AND `f`.`file_type` = 1
+
+
+
+- Bug in Validation for check string. if string charecter is 1 than it return false
+
+
+select count(SELECT DISTINCT(`dm`.`user_id`) 
+FROM `project_deliverables` AS  `pd` 
+RIGHT JOIN `deliverable_members`  AS `dm`
+ON  `pd`.`deliverable_id` = `dm`.`deliverable_id`
+AND `pd`.`project_id` = 53);
+
+
+SELECT count(*) AS `total_member`
+FROM  
+(SELECT DISTINCT(`dm`.`user_id`)
+FROM `project_deliverables` AS  `pd` 
+RIGHT JOIN `deliverable_members`  AS `dm`
+ON  `pd`.`deliverable_id` = `dm`.`deliverable_id`
+AND `pd`.`project_id` = 53 GROUP BY `dm`.`user_id`)  `member_table`;
+
+
+
+
+
+$memberCountQuery = "(SELECT count(*) AS `total_member`
+FROM  
+(SELECT DISTINCT(`dm`.`user_id`)
+FROM `project_deliverables` AS  `pd` 
+RIGHT JOIN `deliverable_members`  AS `dm`
+ON  `pd`.`project_deliverable_id` = `dm`.`project_deliverable_id`
+AND `pd`.`project_id` = 53)  `member_table`) AS 
+`member_count`";
+SELECT 
+                `project_id`, `logo_url`, `name`, `description`, `project_status_id`, `is_archive`,
+                (SELECT GROUP_CONCAT(`deliverable_name`),
+                ".$memberCountQuery."
+                 FROM `deliverables` as `dl` JOIN `project_deliverables` As `pd` 
+                 ON `dl`.`deliverable_id`=`pd`.`deliverable_id` 
+                 WHERE `pd`.`project_id` = `pj`.`project_id` 
+                 GROUP BY `pd`.`project_id` )
+                 as `deliverables`
+                 FROM `projects` as `pj` WHERE `pj`.`is_archive` = 0;
+
+
+
+// delivrable detaisl for project
+SELECT `dl`.`deliverable_id`, `dl`.`deliverable_name`
+from `project_deliverables` as `pd`, `deliverables` as `dl`
+WHERE `pd`.`project_id`= 1 AND 
+`pd`.`deliverable_id` = `dl`.`deliverable_id`
+
+
+// 
+add primary key in project_deliverable pd_id
+
+
+1) add foreign of pd_id in deliverable_member
+alter TABLE `files` add CONSTRAINT FOREIGN key(project_deliverable_id) REFERENCES project_deliverables(project_deliverable_id);
+
+alter table deliverable_members add COLUMN project_deliverable_id int unsigned;
+alter TABLE `deliverable_members` add CONSTRAINT FOREIGN key(project_deliverable_id) REFERENCES project_deliverables(project_deliverable_id);
+
+
+
+
+2) and foreign key of files pd_id
+3) and foreign key of deliverable member_files pd_id
+add fk in files 
+add fk in file_varient
+add deliverable member files.
+
+ ALTER TABLE exam
+ ADD COLUMN student_id INT;
+
+ALTER TABLE table_name
+ADD FOREIGN KEY (column_name)
+REFERENCE table_name(Referencing column_name in table_name);
